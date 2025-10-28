@@ -1,0 +1,242 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Planet — Register</title>
+
+  <link href="css/bootstrap.min.css" rel="stylesheet">
+  <link href="css/font-awesome.min.css" rel="stylesheet">
+  <link href="css/global.css" rel="stylesheet">
+  <link href="css/index.css" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Rajdhani&display=swap" rel="stylesheet">
+
+  <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+  <script src="js/bootstrap.bundle.min.js"></script>
+
+  <style>
+    body { font-family: 'Rajdhani', sans-serif; background:#030303; color:#fff; }
+    .register-card { border-radius:12px; background:#0f0f10; padding:28px; box-shadow: 0 10px 40px rgba(0,0,0,0.6); }
+    .brand { color:#ff2d2d; font-weight:700; }
+    .form-control:focus { border-color: rgba(255,45,45,0.85); box-shadow:none; }
+    .btn-primary.custom { background: #ff2d2d; border-color:#ff2d2d; }
+    .pw-meter { height:6px; border-radius:3px; background: rgba(255,255,255,0.06); overflow:hidden; }
+    .pw-meter > i { display:block; height:100%; width:0; background: linear-gradient(90deg,#ff6b6b,#ff2d2d); transition: width .25s ease; }
+    .error-small { color:#ff7b7b; font-size:.9rem; }
+  </style>
+</head>
+<body>
+  <!-- Same header -->
+  <header class="mb-4">
+    <nav class="navbar navbar-expand-md navbar-light" id="navbar_sticky">
+      <div class="container">
+        <a class="navbar-brand text-white fw-bold brand" href="index.html"><i class="fa fa-video-camera me-1" style="color:#ff2d2d"></i> Planet</a>
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navMain">
+          <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="navMain">
+          <ul class="navbar-nav ms-auto mb-0">
+            <li class="nav-item"><a class="nav-link text-white" href="index.html">Home</a></li>
+            <li class="nav-item"><a class="nav-link text-white" href="about.html">About</a></li>
+            <li class="nav-item"><a class="nav-link text-white" href="contact.html">Contact</a></li>
+          </ul>
+        </div>
+      </div>
+    </nav>
+  </header>
+
+  <main class="py-5">
+    <div class="container">
+      <div class="row justify-content-center">
+        <div class="col-lg-7 col-md-9">
+          <div class="register-card">
+            <h2 class="mb-1">Create your Planet account</h2>
+            <p class="small-muted mb-4">Fast, simple sign up. We only ask for what's necessary.</p>
+
+            <form id="registerForm" novalidate>
+              <div class="row g-3">
+                <div class="col-md-6">
+                  <label class="form-label small-muted" for="firstName">First name</label>
+                  <input id="firstName" name="firstName" type="text" class="form-control" placeholder="First" required>
+                  <div class="invalid-feedback">First name required</div>
+                </div>
+
+                <div class="col-md-6">
+                  <label class="form-label small-muted" for="lastName">Last name</label>
+                  <input id="lastName" name="lastName" type="text" class="form-control" placeholder="Last" required>
+                  <div class="invalid-feedback">Last name required</div>
+                </div>
+
+                <div class="col-12">
+                  <label class="form-label small-muted" for="regEmail">Email</label>
+                  <input id="regEmail" name="email" type="email" class="form-control" placeholder="name@domain.com" required>
+                  <div class="invalid-feedback">Please enter a valid email.</div>
+                </div>
+
+                <div class="col-md-6">
+                  <label class="form-label small-muted" for="password">Password</label>
+                  <div class="input-group">
+                    <input id="password" name="password" type="password" class="form-control" minlength="6" required aria-describedby="pwHelp">
+                    <span class="input-group-text bg-transparent pw-toggle" id="toggleRegPw"><i class="fa fa-eye"></i></span>
+                  </div>
+                  <small id="pwHelp" class="form-text small-muted">At least 6 characters, mix of letters & numbers recommended.</small>
+                  <div class="pw-meter mt-2" aria-hidden="true"><i id="pwMeter"></i></div>
+                  <div class="error-small" id="pwErr"></div>
+                </div>
+
+                <div class="col-md-6">
+                  <label class="form-label small-muted" for="confirmPassword">Confirm password</label>
+                  <input id="confirmPassword" name="confirmPassword" type="password" class="form-control" required>
+                  <div class="invalid-feedback">Passwords must match.</div>
+                </div>
+
+                <div class="col-12">
+                  <label class="form-label small-muted" for="username">Username (public)</label>
+                  <input id="username" name="username" type="text" class="form-control" placeholder="e.g. moviefan123" required pattern="^[a-zA-Z0-9._-]{3,20}$">
+                  <div class="invalid-feedback">3–20 chars; letters, numbers, . _ - allowed.</div>
+                </div>
+
+                <div class="col-12">
+                  <div class="form-check">
+                    <input id="terms" name="terms" class="form-check-input" type="checkbox" required>
+                    <label class="form-check-label small-muted" for="terms">I agree to the <a href="#" style="color:#ff2d2d">Terms</a> & <a href="#" style="color:#ff2d2d">Privacy</a>.</label>
+                    <div class="invalid-feedback">You must accept terms to continue.</div>
+                  </div>
+                </div>
+
+                <div class="col-12">
+                  <button class="btn btn-primary custom w-100" type="submit">Create account</button>
+                </div>
+
+                <div class="col-12 text-center small-muted">
+                  Already a member? <a href="login.html" style="color:#ff2d2d">Sign in</a>
+                </div>
+              </div>
+            </form>
+
+            <hr class="mt-4" style="border-color: rgba(255,255,255,0.04)">
+
+            <div class="small text-center small-muted mt-3">This is a client-side demo. Connect to your API endpoint where marked in the script.</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <footer class="pt-4 pb-4 text-center small-muted">
+    © <span id="year2"></span> Planet
+  </footer>
+
+  <script>
+    (function($){
+      $('#year2').text(new Date().getFullYear());
+
+      // show/hide password
+      $('#toggleRegPw').on('click', function(){
+        var $pw = $('#password');
+        var type = $pw.attr('type') === 'password' ? 'text' : 'password';
+        $pw.attr('type', type);
+        $(this).find('i').toggleClass('fa-eye fa-eye-slash');
+        $pw.focus();
+      });
+
+      // password strength meter simple function
+      function strengthScore(pwd){
+        var score = 0;
+        if(!pwd) return 0;
+        if(pwd.length >= 6) score += 1;
+        if(/[a-z]/.test(pwd) && /[A-Z]/.test(pwd)) score += 1;
+        if(/\d/.test(pwd)) score += 1;
+        if(/[^A-Za-z0-9]/.test(pwd)) score += 1;
+        return score; // 0..4
+      }
+
+      function updatePwMeter(pwd){
+        var s = strengthScore(pwd);
+        var percent = (s / 4) * 100;
+        $('#pwMeter').css('width', percent + '%');
+        // color changes via background gradient; small textual hint:
+        var hint = '';
+        if(s <= 1) hint = 'Weak';
+        else if(s === 2) hint = 'Fair';
+        else if(s === 3) hint = 'Good';
+        else if(s === 4) hint = 'Strong';
+        $('#pwErr').text(hint ? hint : '');
+      }
+
+      $('#password').on('input', function(){
+        updatePwMeter($(this).val());
+      });
+
+      // registration submission & validation
+      $('#registerForm').on('submit', function(e){
+        e.preventDefault();
+        var form = this;
+        form.classList.add('was-validated');
+
+        // basic HTML5 check
+        if(!form.checkValidity()){
+          return;
+        }
+
+        // extra checks: password match & strength
+        var pwd = $('#password').val();
+        var confirm = $('#confirmPassword').val();
+        if(pwd !== confirm){
+          $('#confirmPassword').addClass('is-invalid');
+          $('#confirmPassword').siblings('.invalid-feedback').show();
+          return;
+        } else {
+          $('#confirmPassword').removeClass('is-invalid');
+        }
+
+        if(strengthScore(pwd) < 2){
+          $('#pwErr').text('Please choose a stronger password.');
+          return;
+        }
+
+        // prepare payload
+        var payload = {
+          firstName: $('#firstName').val().trim(),
+          lastName: $('#lastName').val().trim(),
+          email: $('#regEmail').val().trim(),
+          username: $('#username').val().trim()
+          // DO NOT store password in localStorage in real app
+        };
+
+        // TODO: send to server here (AJAX example)
+        // $.ajax({
+        //   url: '/api/auth/register',
+        //   method: 'POST',
+        //   data: JSON.stringify({ ...payload, password: pwd }),
+        //   contentType: 'application/json',
+        //   success: function(res){ ... }
+        // });
+
+        // For demo: temporarily store an "account" in localStorage (only for local demo)
+        var demoUsers = JSON.parse(localStorage.getItem('planet_demo_users') || '[]');
+        demoUsers.push(payload);
+        localStorage.setItem('planet_demo_users', JSON.stringify(demoUsers));
+
+        alert('Account created (demo). You will be redirected to sign in.');
+        window.location.href = 'login.html';
+      });
+
+      // realtime username availability demo (checks localStorage demo users)
+      $('#username').on('blur', function(){
+        var u = $(this).val().trim();
+        if(!u) return;
+        var demoUsers = JSON.parse(localStorage.getItem('planet_demo_users') || '[]');
+        var exists = demoUsers.some(function(x){ return x.username && x.username.toLowerCase() === u.toLowerCase(); });
+        if(exists){
+          $(this).addClass('is-invalid');
+          $(this).siblings('.invalid-feedback').text('Username already taken');
+        } else {
+          $(this).removeClass('is-invalid');
+        }
+      });
+
+    })(jQuery);
+  </script>
+</body>
+</html>
