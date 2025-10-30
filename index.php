@@ -1,104 +1,102 @@
+<?php
+session_start();
+?>
 <!DOCTYPE html>
 <html lang="en">
 <head>
-	<meta charset="utf-8">
-	<meta http-equiv="X-UA-Compatible" content="IE=edge">
-	<meta name="viewport" content="width=device-width, initial-scale=1">
-	<title>Planet</title>
-	<link href="css/bootstrap.min.css" rel="stylesheet" >
-	<link href="css/font-awesome.min.css" rel="stylesheet" >
-	<link href="css/global.css" rel="stylesheet">
-	<link href="css/index.css" rel="stylesheet">
-	<link href="https://fonts.googleapis.com/css2?family=Rajdhani&display=swap" rel="stylesheet">
-	<script src="js/bootstrap.bundle.min.js"></script>
-
+<meta charset="utf-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Planet — Flick-Fix Home</title>
+<link href="css/bootstrap.min.css" rel="stylesheet" >
+<link href="css/font-awesome.min.css" rel="stylesheet" >
+<link href="css/global.css" rel="stylesheet">
+<link href="css/index.css" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Rajdhani&display=swap" rel="stylesheet">
+<script src="js/bootstrap.bundle.min.js"></script>
+<style>
+body {font-family:'Rajdhani',sans-serif; background:#030303; color:#fff;}
+.nav-profile img {border-radius:50%; width:40px; height:40px; object-fit:cover;}
+.col_red {color:#ff2d2d;}
+.bg_red {background-color:#ff2d2d;}
+.bg_grey {background-color:#1a1a1a;}
+.button {background:#ff2d2d;color:#fff;padding:6px 15px;border-radius:4px;text-decoration:none;}
+</style>
 </head>
 <body>
 
 <section id="top">
 <div class="container">
- <div class="row top_1">
+ <div class="row top_1 align-items-center">
   <div class="col-md-3">
    <div class="top_1l pt-1">
-    <h3 class="mb-0"><a class="text-white" href="index.html"><i class="fa fa-video-camera col_red me-1"></i> Planet</a></h3>
+    <h3 class="mb-0"><a class="text-white" href="index.php"><i class="fa fa-video-camera col_red me-1"></i> Planet</a></h3>
    </div>
   </div>
   <div class="col-md-5">
    <div class="top_1m">
     <div class="input-group">
-				<input type="text" class="form-control bg-black" placeholder="Search Site...">
-				<span class="input-group-btn">
-					<button class="btn btn text-white bg_red rounded-0 border-0" type="button">
-						 Search</button>
-				</span>
-		</div>
+        <input type="text" class="form-control bg-black" placeholder="Search Site...">
+        <span class="input-group-btn">
+            <button class="btn btn text-white bg_red rounded-0 border-0" type="button">Search</button>
+        </span>
+    </div>
    </div>
   </div>
-  <div class="col-md-4">
-   <div class="top_1r text-end">
-     <ul class="social-network social-circle mb-0">
-			<li><a href="#" class="icoRss" title="Rss"><i class="fa fa-instagram"></i></a></li>
-			<li><a href="#" class="icoFacebook" title="Facebook"><i class="fa fa-facebook"></i></a></li>
-			<li><a href="#" class="icoTwitter" title="Twitter"><i class="fa fa-twitter"></i></a></li>
-			<li><a href="#" class="icoGoogle" title="Google +"><i class="fa fa-youtube"></i></a></li>
-			<li><a href="#" class="icoLinkedin" title="Linkedin"><i class="fa fa-linkedin"></i></a></li>
-		</ul>
-   </div>
+  <div class="col-md-4 text-end d-flex justify-content-end align-items-center">
+     <ul class="social-network social-circle mb-0 me-3 d-flex align-items-center">
+        <li><a href="#" class="icoRss" title="Instagram"><i class="fa fa-instagram"></i></a></li>
+        <li><a href="#" class="icoFacebook" title="Facebook"><i class="fa fa-facebook"></i></a></li>
+        <li><a href="#" class="icoTwitter" title="Twitter"><i class="fa fa-twitter"></i></a></li>
+        <li><a href="#" class="icoGoogle" title="YouTube"><i class="fa fa-youtube"></i></a></li>
+        <li><a href="#" class="icoLinkedin" title="LinkedIn"><i class="fa fa-linkedin"></i></a></li>
+     </ul>
+
+     <?php if(isset($_SESSION['user'])): 
+         $profile_pic = !empty($_SESSION['user']['profile_pic']) ? $_SESSION['user']['profile_pic'] : 'default.png';
+     ?>
+         <div class="nav-profile d-flex align-items-center">
+             <img src="uploads/<?php echo $profile_pic; ?>" alt="Profile">
+             <span class="ms-2"><?php echo $_SESSION['user']['first_name']; ?></span>
+             <a href="logout.php" class="ms-3 text-danger">Logout</a>
+         </div>
+     <?php else: ?>
+         <a class="btn btn-sm btn-danger" href="login.php">Login</a>
+     <?php endif; ?>
   </div>
  </div>
 </div>
 </section>
 
+
 <section id="header">
 <nav class="navbar navbar-expand-md navbar-light" id="navbar_sticky">
   <div class="container">
-    <a class="navbar-brand text-white fw-bold" href="index.html"><i class="fa fa-video-camera col_red me-1"></i> Planet</a>
-    <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+    <a class="navbar-brand text-white fw-bold" href="index.php"><i class="fa fa-video-camera col_red me-1"></i> Planet</a>
+    <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent">
       <span class="navbar-toggler-icon"></span>
     </button>
     <div class="collapse navbar-collapse" id="navbarSupportedContent">
       <ul class="navbar-nav mb-0">
-        <li class="nav-item">
-          <a class="nav-link active" aria-current="page" href="index.html">Home</a>
-        </li>
-		<li class="nav-item">
-          <a class="nav-link" href="about.html">About Us</a>
-        </li>
+        <li class="nav-item"><a class="nav-link active" href="index.php">Home</a></li>
+        <li class="nav-item"><a class="nav-link" href="about.html">About Us</a></li>
         <li class="nav-item dropdown">
-          <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
-            Blog
-          </a>
-          <ul class="dropdown-menu drop_1" aria-labelledby="navbarDropdown">
+          <a class="nav-link dropdown-toggle" href="#" data-bs-toggle="dropdown">Blog</a>
+          <ul class="dropdown-menu drop_1">
             <li><a class="dropdown-item" href="blog.html">Blog</a></li>
             <li><a class="dropdown-item border-0" href="blog_detail.html">Blog Detail</a></li>
           </ul>
         </li>
-		<li class="nav-item">
-          <a class="nav-link" href="services.html">Services</a>
-        </li>
-		<li class="nav-item">
-          <a class="nav-link" href="team.html">Team</a>
-        </li>
-		<li class="nav-item dropdown">
-          <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
-            Pages
-          </a>
-          <ul class="dropdown-menu drop_1" aria-labelledby="navbarDropdown">
-            <li><a class="dropdown-item" href="about.html">About Us</a></li>
-            <li><a class="dropdown-item" href="services.html">Services</a></li>
-			<li><a class="dropdown-item" href="team.html">Team</a></li>
-            <li><a class="dropdown-item border-0" href="contact.html">Contact</a></li>
-          </ul>
-        </li>
-		
-		<li class="nav-item">
-          <a class="nav-link" href="contact.html">Contact Us</a>
-        </li>
+        <li class="nav-item"><a class="nav-link" href="services.html">Services</a></li>
+        <li class="nav-item"><a class="nav-link" href="team.html">Team</a></li>
+        <li class="nav-item"><a class="nav-link" href="contact.html">Contact Us</a></li>
+
       </ul>
     </div>
   </div>
 </nav>
 </section>
+
 
 <section id="center" class="center_home">
  <div id="carouselExampleCaptions" class="carousel slide" data-bs-ride="carousel">
