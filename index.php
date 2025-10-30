@@ -52,20 +52,71 @@ body {font-family:'Rajdhani',sans-serif; background:#030303; color:#fff;}
         <li><a href="#" class="icoLinkedin" title="LinkedIn"><i class="fa fa-linkedin"></i></a></li>
      </ul>
 
-     <?php if(isset($_SESSION['user'])): 
-         $profile_pic = !empty($_SESSION['user']['profile_pic']) ? $_SESSION['user']['profile_pic'] : 'default.png';
-     ?>
-         <div class="nav-profile d-flex align-items-center">
-             <img src="uploads/<?php echo $profile_pic; ?>" alt="Profile">
-             <span class="ms-2"><?php echo $_SESSION['user']['first_name']; ?></span>
-             <a href="logout.php" class="ms-3 text-danger">Logout</a>
-         </div>
-     <?php else: ?>
-         <a class="btn btn-sm btn-danger" href="login.php">Login</a>
-     <?php endif; ?>
+             <?php if (isset($_SESSION['user'])): 
+          $profile_pic = !empty($_SESSION['user']['profile_pic']) ? $_SESSION['user']['profile_pic'] : 'default.png';
+        ?>
+          <!-- Dropdown -->
+          <div class="nav-profile dropdown">
+            <a href="#" class="d-flex align-items-center text-white text-decoration-none dropdown-toggle"
+               id="profileDropdown" data-bs-toggle="dropdown" aria-expanded="false">
+              <img src="uploads/<?php echo htmlspecialchars($profile_pic); ?>" 
+                   alt="Profile" class="me-2">
+              <span><?php echo htmlspecialchars($_SESSION['user']['first_name']); ?></span>
+            </a>
+
+  <ul class="dropdown-menu dropdown-menu-end border-0 shadow mt-2 p-3"
+    aria-labelledby="profileDropdown"
+    style="min-width:250px; background:#0f0f10; color:#fff; border-radius:10px;">
+
+  <li class="text-center mb-2">
+    <img src="uploads/<?php echo htmlspecialchars($profile_pic); ?>" 
+         alt="Profile"
+         class="rounded-circle mb-2"
+         style="width:70px; height:70px; object-fit:cover; border:2px solid #ff2d2d;">
+    <div class="fw-bold text-white">
+      <?php echo htmlspecialchars($_SESSION['user']['first_name'] . ' ' . $_SESSION['user']['last_name']); ?>
+    </div>
+    <div class="small text-white-50">
+      <?php echo htmlspecialchars($_SESSION['user']['email']); ?>
+    </div>
+  </li>
+
+  <li><hr class="dropdown-divider" style="border-color:rgba(255,255,255,0.15);"></li>
+
+  <li>
+    <a class="dropdown-item text-white d-flex align-items-center" href="update_profile.php"
+       style="transition:all 0.2s;">
+      <i class="fa fa-user me-2 col_red"></i> Update Profile
+    </a>
+  </li>
+
+  <li>
+    <a class="dropdown-item text-white d-flex align-items-center" href="change_password.php"
+       style="transition:all 0.2s;">
+      <i class="fa fa-lock me-2 col_red"></i> Change Password
+    </a>
+  </li>
+
+  <li><hr class="dropdown-divider" style="border-color:rgba(255,255,255,0.15);"></li>
+
+  <li>
+    <a class="dropdown-item text-white d-flex align-items-center" href="logout.php"
+       style="transition:all 0.2s;">
+      <i class="fa fa-sign-out me-2 col_red"></i> Logout
+    </a>
+  </li>
+</ul>
+
+
+              
+            
+          </div>
+        <?php else: ?>
+          <a class="btn btn-sm btn-danger" href="login.php">Login</a>
+        <?php endif; ?>
+      </div>
+    </div>
   </div>
- </div>
-</div>
 </section>
 
 

@@ -17,29 +17,41 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $user = $result->fetch_assoc();
 
     if (password_verify($password, $user['password'])) {
-    $_SESSION['user_id'] = $user['id']; // store user ID
-    $_SESSION['username'] = $user['username'];
-    $_SESSION['fullname'] = $user['fullname']; // add fullname
-    $_SESSION['email'] = $user['email'];       // add email
-    $_SESSION['profile_pic'] = $user['profile_pic']; // path to profile picture
-    $_SESSION['role'] = $user['role'];
+    session_regenerate_id(true); // for security
+
+    $_SESSION['user'] = [
+        'id' => $user['id'],
+        'first_name' => $user['first_name'],
+        'last_name' => $user['last_name'],
+        'email' => $user['email'],
+        'username' => $user['username'],
+        'profile_pic' => $user['profile_pic'],
+        'role' => $user['role'] ?? 'user'
+    ];
+
     $_SESSION['login_time'] = time();
 
-    if ($user['role'] == 'admin') {
-        header("Location: admin.php");
-    } else {
-        header("Location: index.php"); // changed to PHP so we can use session
-    }
+    header("Location: index.php");
     exit;
 }
- else {
+
+
+      // Redirect based on role
+      if ($user['role'] == 'admin') {
+        header("Location: admin.php");
+      } else {
+        header("Location: index.php"); // changed from index.html
+      }
+      exit;
+    } else {
       $message = "❌ Invalid password!";
     }
   } else {
     $message = "❌ No account found with that email!";
   }
-}
+
 ?>
+
 <!DOCTYPE html>
 <html lang="en">
 
