@@ -5,52 +5,53 @@ include('db.php');
 $message = '';
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-  $email = trim($_POST['email']);
-  $password = $_POST['password'];
+    $email = trim($_POST['email']);
+    $password = $_POST['password'];
 
-  $stmt = $conn->prepare("SELECT * FROM users WHERE email = ?");
-  $stmt->bind_param("s", $email);
-  $stmt->execute();
-  $result = $stmt->get_result();
+    // ✅ Check if user exists
+    $stmt = $conn->prepare("SELECT * FROM users WHERE email = ?");
+    $stmt->bind_param("s", $email);
+    $stmt->execute();
+    $result = $stmt->get_result();
 
-  if ($result->num_rows === 1) {
-    $user = $result->fetch_assoc();
+    if ($result->num_rows === 1) {
+        $user = $result->fetch_assoc();
 
-    if (password_verify($password, $user['password'])) {
-    session_regenerate_id(true); // for security
+        // ✅ Verify password
+        if (password_verify($password, $user['password'])) {
+            session_regenerate_id(true); // security
 
-    $_SESSION['user'] = [
-        'id' => $user['id'],
-        'first_name' => $user['first_name'],
-        'last_name' => $user['last_name'],
-        'email' => $user['email'],
-        'username' => $user['username'],
-        'profile_pic' => $user['profile_pic'],
-        'role' => $user['role'] ?? 'user'
-    ];
+            // ✅ Store user info in session
+            $_SESSION['user'] = [
+                'id' => $user['id'],
+                'first_name' => $user['first_name'],
+                'last_name' => $user['last_name'],
+                'email' => $user['email'],
+                'username' => $user['username'],
+                'profile_pic' => $user['profile_pic'],
+                'role' => $user['role'] ?? 'user'
+            ];
 
-    $_SESSION['login_time'] = time();
+            $_SESSION['login_time'] = time();
 
-    header("Location: index.php");
-    exit;
-}
-
-
-      // Redirect based on role
-      if ($user['role'] == 'admin') {
-        header("Location: admin.php");
-      } else {
-        header("Location: index.php"); // changed from index.html
-      }
-      exit;
+            // ✅ Redirect based on role
+            if ($user['role'] === 'admin') {
+                header("Location: admin/dashboard.php");
+            } else {
+                header("Location: index.php");
+            }
+            exit;
+        } else {
+            $message = "❌ Invalid password!";
+        }
     } else {
-      $message = "❌ Invalid password!";
+        $message = "❌ No account found with that email!";
     }
-  } else {
-    $message = "❌ No account found with that email!";
-  }
-
+}
 ?>
+
+
+
 
 <!DOCTYPE html>
 <html lang="en">
