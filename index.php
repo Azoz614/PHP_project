@@ -131,6 +131,8 @@ body {font-family:'Rajdhani',sans-serif; background:#030303; color:#fff;}
         <li class="nav-item"><a class="nav-link active" href="index.php">Home</a></li>
         <li class="nav-item"><a class="nav-link" href="about.html">About Us</a></li>
         <li class="nav-item"><a class="nav-link" href="contact.html">Contact Us</a></li>
+        <li class="nav-item"><a class="nav-link" href="booking.html"> Ticket booking</a></li>
+
 
       </ul>
     </div>
