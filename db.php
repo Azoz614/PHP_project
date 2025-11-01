@@ -5,7 +5,7 @@ if (session_status() === PHP_SESSION_NONE) {
 
 $host = "localhost";
 $user = "root";
-$pass = "";
+$pass = "1234";
 $dbname = "FLICK-FIX";
 
 $conn = new mysqli($host, $user, $pass, $dbname);
