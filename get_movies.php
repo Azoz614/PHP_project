@@ -2,7 +2,7 @@
 $servername = "localhost";
 $username = "root";
 $password = "";  // change if needed
-$dbname = "movie_booking"; // your database name
+$dbname = "flick_fix"; // your database name
 
 $conn = new mysqli($servername, $username, $password, $dbname);
 
