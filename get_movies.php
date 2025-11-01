@@ -1,26 +1,26 @@
 <?php
 $servername = "localhost";
 $username = "root";
-$password = "";  // change if needed
-$dbname = "flick_fix"; // your database name
+$password = ""; // Change if you set one
+$dbname = "FLICK-FIX"; // Use your database name
 
 $conn = new mysqli($servername, $username, $password, $dbname);
 
 if ($conn->connect_error) {
-  die("Connection failed: " . $conn->connect_error);
+  die(json_encode(["error" => "Connection failed: " . $conn->connect_error]));
 }
 
-$sql = "SELECT id, title FROM movies";  // your table (based on the screenshot)
+$sql = "SELECT id, title FROM movies";
 $result = $conn->query($sql);
 
 $movies = [];
-if ($result->num_rows > 0) {
+if ($result && $result->num_rows > 0) {
   while ($row = $result->fetch_assoc()) {
     $movies[] = $row;
   }
 }
 
-header('Content-Type: application/json');
+header("Content-Type: application/json");
 echo json_encode($movies);
 $conn->close();
 ?>

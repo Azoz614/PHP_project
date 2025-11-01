@@ -35,9 +35,8 @@
 
 <label for="movie">Select Movie:</label>
 <select id="movie" onchange="loadTheaters()" required>
-  <option value="">-- Select Movie --</option>
+  <option value="">-- Loading Movies... --</option>
 </select>
-
 
 <label for="theater">Select Theater:</label>
 <select id="theater" onchange="loadTimes()" required>
@@ -47,7 +46,7 @@
 <label for="time">Select Show Time:</label>
 <select id="time" onchange="loadSeats()" required>
   <option value="">-- Select Time --</option>
-   <option value="1.00">1.00</option>
+  <option value="1.00">1.00</option>
   <option value="4.00">4.00</option>
   <option value="8.00">8.00</option>
 </select>
@@ -62,13 +61,32 @@
 
 <center><a href="view_bookings.php">⬅ View Bookings</a></center>
 
-<center><h2><a href="order.php">Do you want order foods.</a></h2></center>
+<center><h2><a href="order.php">Do you want to order foods?</a></h2></center>
 </div>
 
 <script>
 // Global variables
 let selectedSeats = [];
 const seatPrice = 10;
+
+// Load movies from database
+document.addEventListener("DOMContentLoaded", loadMovies);
+
+function loadMovies() {
+  fetch('get_movies.php')
+    .then(res => res.json())
+    .then(data => {
+      let movieSelect = document.getElementById('movie');
+      movieSelect.innerHTML = '<option value="">-- Select Movie --</option>';
+      data.forEach(movie => {
+        movieSelect.innerHTML += `<option value="${movie.id}">${movie.title}</option>`;
+      });
+    })
+    .catch(err => {
+      console.error('Error loading movies:', err);
+      alert('Error loading movies. Please check get_movies.php or database connection.');
+    });
+}
 
 // Fetch theaters for selected movie
 function loadTheaters() {
@@ -149,24 +167,6 @@ function updatePrice() {
   document.getElementById('seat-count').textContent = selectedSeats.length;
   document.getElementById('total-price').textContent = selectedSeats.length * seatPrice;
 }
-
-
-// Load movies dynamically
-document.addEventListener("DOMContentLoaded", loadMovies);
-
-function loadMovies() {
-  fetch('get_movies.php')
-    .then(res => res.json())
-    .then(data => {
-      let movieSelect = document.getElementById('movie');
-      movieSelect.innerHTML = '<option value="">-- Select Movie --</option>';
-      data.forEach(m => {
-        movieSelect.innerHTML += `<option value="${m.id}">${m.title}</option>`;
-      });
-    })
-    .catch(err => console.error('Error loading movies:', err));
-}
-
 
 // Submit booking
 function submitBooking() {

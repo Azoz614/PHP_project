@@ -1,60 +1,67 @@
 <?php
+header('Content-Type: application/json');
+
 $servername = "localhost";
 $username = "root";
 $password = "";
-$dbname = "flick-fix";
+$dbname = "FLICK-FIX"; // ✅ Updated database name
 
 $conn = new mysqli($servername, $username, $password, $dbname);
 if ($conn->connect_error) {
-  die(json_encode(["success" => false, "message" => "Database connection failed."]));
+  echo json_encode(["success" => false, "message" => "Database connection failed: " . $conn->connect_error]);
+  exit;
 }
 
-// Get JSON data from frontend
+// ✅ Decode JSON data from frontend
 $data = json_decode(file_get_contents("php://input"), true);
 
-$name = $conn->real_escape_string($data['name']);
-$movie = intval($data['movie']);
-$theater = intval($data['theater']);
-$time = intval($data['time']);
-$seats = $data['seats'];
+$name = isset($data['name']) ? $conn->real_escape_string($data['name']) : '';
+$movie = isset($data['movie']) ? intval($data['movie']) : 0;
+$theater = isset($data['theater']) ? intval($data['theater']) : 0;
+$time = isset($data['time']) ? intval($data['time']) : 0;
+$seats = isset($data['seats']) && is_array($data['seats']) ? $data['seats'] : [];
 
-$response = ["success" => false, "message" => ""];
+if (!$name || !$movie || !$theater || !$time || empty($seats)) {
+  echo json_encode(["success" => false, "message" => "⚠️ Missing required booking details."]);
+  exit;
+}
 
-// Start transaction to prevent seat duplication
+// ✅ Begin transaction (to prevent double-booking)
 $conn->begin_transaction();
 
 try {
     foreach ($seats as $seat) {
         $seat = $conn->real_escape_string($seat);
 
-        // Check if seat already booked for the same movie, theater & showtime
-        $check_sql = "SELECT * FROM bookings 
-                      WHERE movie_id='$movie' AND theater_id='$theater' 
-                      AND showtime_id='$time' AND seat_number='$seat' 
+        // ✅ Check if seat already booked for this movie, theater & time
+        $check_sql = "SELECT booking_id FROM bookings 
+                      WHERE movie_id = $movie 
+                      AND theater_id = $theater 
+                      AND showtime_id = $time 
+                      AND seat_number = '$seat' 
                       FOR UPDATE";
         $result = $conn->query($check_sql);
 
-        if ($result->num_rows > 0) {
-            throw new Exception("❌ Seat $seat is already booked! Please choose another.");
+        if ($result && $result->num_rows > 0) {
+            throw new Exception("❌ Seat '$seat' is already booked. Please choose another.");
         }
 
-        // Insert booking
-        $insert_sql = "INSERT INTO bookings (customer_name, movie_id, theater_id, showtime_id, seat_number) 
-                       VALUES ('$name', '$movie', '$theater', '$time', '$seat')";
+        // ✅ Insert booking
+        $insert_sql = "INSERT INTO bookings (customer_name, movie_id, theater_id, showtime_id, seat_number, booking_date)
+                       VALUES ('$name', $movie, $theater, $time, '$seat', NOW())";
         if (!$conn->query($insert_sql)) {
-            throw new Exception("Booking failed for seat $seat: " . $conn->error);
+            throw new Exception("❌ Booking failed for seat '$seat': " . $conn->error);
         }
     }
 
-    // Commit all bookings
+    // ✅ Commit successful transaction
     $conn->commit();
-    $response = ["success" => true, "message" => "✅ Booking Successful!"];
+    echo json_encode(["success" => true, "message" => "✅ Booking Successful!"]);
 
 } catch (Exception $e) {
-    $conn->rollback(); // Rollback transaction on error
-    $response = ["success" => false, "message" => $e->getMessage()];
+    $conn->rollback();
+    echo json_encode(["success" => false, "message" => $e->getMessage()]);
 }
 
-echo json_encode($response);
 $conn->close();
 ?>
