@@ -60,19 +60,46 @@ body { font-family:'Rajdhani',sans-serif; background:#030303; color:#fff; margin
 #top { background:#0f0f10; padding:10px 0; }
 #top .nav-profile img { width:40px; height:40px; border-radius:50%; object-fit:cover; }
 #top .dropdown-menu { background:#1a1a1a; }
+
 .slider-section { padding:40px 0; }
 .slider-section h1 { color:#fff; text-align:center; margin-bottom:20px; }
-.slider-container { position:relative; max-width:1100px; margin:auto; overflow:hidden; }
-.slider { display:flex; transition:0.5s; }
-.slide { flex:0 0 220px; margin:10px; background:#1a1a1a; color:#fff; border-radius:10px; text-align:center; padding:15px; }
+.slider-container { position: relative; max-width:1100px; margin:auto; overflow:hidden; }
+.slider { display:flex; gap:10px; scroll-behavior:smooth; overflow-x:auto; padding-bottom:10px; }
+.slide { flex: 0 0 220px; background:#1a1a1a; border-radius:10px; text-align:center; padding:15px; scroll-snap-align:start; transition:transform 0.3s; }
+.slide:hover { transform:scale(1.05); }
 .slide img { width:100%; height:150px; object-fit:cover; border-radius:8px; }
 .slide h3 { margin:10px 0 5px; }
 .slide p { color:#ccc; }
 .slide button { background:#ff4757; color:#fff; border:none; border-radius:5px; padding:8px 12px; cursor:pointer; margin-top:5px; }
 .slide button:hover { background:#e84118; }
-.arrow { position:absolute; top:50%; transform:translateY(-50%); font-size:24px; color:#fff; background:#ff4757; border:none; padding:10px; cursor:pointer; border-radius:50%; z-index:10; }
-.arrow.left { left:-40px; } 
-.arrow.right { right:-40px; }
+
+.arrow {
+  position:absolute;
+  top:50%;
+  transform:translateY(-50%);
+  background:#ffb300;
+  color:#000;
+  font-size:22px;
+  border:none;
+  padding:10px 14px;
+  border-radius:50%;
+  cursor:pointer;
+  transition:all 0.3s ease;
+  box-shadow:0 0 10px rgba(255,179,0,0.4);
+  z-index:10;
+  opacity:0;
+}
+.arrow:hover {
+  background:#ff9900;
+  box-shadow:0 0 15px rgba(255,153,0,0.7);
+  transform:translateY(-50%) scale(1.1);
+}
+.slider-container:hover .arrow {
+  opacity:1;
+}
+.arrow.left { left:-25px; }
+.arrow.right { right:-25px; }
+
 .cart-container { margin:40px auto; background:#1a1a1a; padding:20px; border-radius:10px; max-width:500px; }
 .cart-container h2 { margin-bottom:15px; text-align:center; }
 .cart-actions { display:flex; justify-content:space-between; margin-top:15px; }
@@ -94,9 +121,7 @@ button, .btn { border-radius:4px; }
    <a href="index.php"><img src="img/newlogo.png" style="width:100px;height:70px;"></a>
   </div>
   <div class="col-md-5">
-   <div class="input-group">
-    
-   </div>
+   <div class="input-group"></div>
    <div id="searchResults" class="mt-2"></div>
   </div>
   <div class="col-md-4 text-end d-flex justify-content-end align-items-center">
@@ -139,13 +164,13 @@ button, .btn { border-radius:4px; }
 </form>
 </div>
 
-<div class="slider-container position-relative">
-<button class="arrow left" onclick="prevSlide()">&#10094;</button>
-<div class="slider" id="slider">
+<div class="slider-container">
+  <button class="arrow left"><i class="fa-solid fa-chevron-left"></i></button>
+  <div class="slider" id="slider">
     <?php if($foods->num_rows>0): ?>
         <?php while($food=$foods->fetch_assoc()): ?>
             <?php $imgPath = preg_match('/^(http|https|\/)/',$food['image']) ? $food['image'] : 'uploads/'.basename($food['image']); ?>
-            <div class="slide" data-id="<?= $food['id'] ?>" data-name="<?= htmlspecialchars($food['name']) ?>" data-price="<?= $food['price'] ?>">
+            <div class="slide">
                 <img src="<?= $imgPath ?>" alt="<?= htmlspecialchars($food['name']) ?>">
                 <h3><?= htmlspecialchars($food['name']) ?></h3>
                 <p>Rs.<?= number_format($food['price'],2) ?></p>
@@ -155,8 +180,8 @@ button, .btn { border-radius:4px; }
     <?php else: ?>
         <p>No foods available.</p>
     <?php endif; ?>
-</div>
-<button class="arrow right" onclick="nextSlide()">&#10095;</button>
+  </div>
+  <button class="arrow right"><i class="fa-solid fa-chevron-right"></i></button>
 </div>
 
 <div class="cart-container">
@@ -175,8 +200,12 @@ button, .btn { border-radius:4px; }
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
 <script>
 let slider = document.getElementById("slider");
-function nextSlide(){slider.scrollBy({left:240, behavior:'smooth'});}
-function prevSlide(){slider.scrollBy({left:-240, behavior:'smooth'});}
+const slideWidth = document.querySelector('.slide').offsetWidth + 10;
+
+document.querySelector(".arrow.left").addEventListener("click", ()=> slider.scrollBy({left:-slideWidth*4, behavior:'smooth'}));
+document.querySelector(".arrow.right").addEventListener("click", ()=> slider.scrollBy({left:slideWidth*4, behavior:'smooth'}));
+
+// --- Cart functionality ---
 let cart = [];
 function addToCart(id,name,price){
   const item = cart.find(i=>i.id===id);
