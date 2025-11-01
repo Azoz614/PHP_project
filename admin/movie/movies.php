@@ -4,7 +4,7 @@ ini_set('display_errors', 1);
 
 // Include database connection and functions
 require_once __DIR__ . '/../../db.php';
-require_once __DIR__ . '/../../function.php';
+require_once __DIR__ . '/../function.php';
 
 // Only allow admins to access this page
 require_admin();

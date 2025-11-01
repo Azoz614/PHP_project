@@ -1,7 +1,7 @@
 <?php
 session_start();
-require_once 'db.php'; // DB connection
-require_once 'function.php';
+require_once __DIR__ . '/db.php';         
+require_once __DIR__ . '/admin/function.php';
 
 $message = '';
 
