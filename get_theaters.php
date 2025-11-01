@@ -1,5 +1,5 @@
 <?php
-$conn = new mysqli("localhost","root","","movie_booking");
+$conn = new mysqli("localhost","root","","flick-fix");
 if($conn->connect_error) die("Connection failed");
 
 $movie_id = $_GET['movie_id'];
