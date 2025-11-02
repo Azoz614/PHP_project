@@ -1,5 +1,17 @@
 
 
+CREATE TABLE theaters (
+  theater_id INT AUTO_INCREMENT PRIMARY KEY,
+  name VARCHAR(100) NOT NULL,
+  location VARCHAR(100)
+);
+
+-- Sample theaters
+INSERT INTO theaters (name, location) VALUES
+('CineMax Colombo', 'Colombo'),
+('Savoy 3D', 'Wellawatte'),
+('Liberty Cinema', 'Colombo 03'),
+('PVR Kandy', 'Kandy');
 
 
 
