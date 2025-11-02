@@ -311,7 +311,7 @@ body {font-family:'Rajdhani',sans-serif; background:#030303; color:#fff;}
    <div class="row footer_1">
     <div class="col-md-4">
 	 <div class="footer_1i">
-	   <h3><a class="text-white" href="index.html"><i class="fa fa-video-camera col_red me-1"></i> Planet</a></h3>
+	   <h3><a class="text-white" href="index.html"><i class="fa fa-video-camera col_red me-1"></i> Flick-fix</a></h3>
 	   <p class="mt-3">Lorem ipsum dolor sit amet consect etur adi pisicing elit sed do eiusmod tempor incididunt. Lorem ipsum dolor sit amet consect etur. </p>
 	   <h6 class="fw-normal"><i class="fa fa-map-marker fs-5 align-middle col_red me-1"></i> 5311 Ceaver Sidge Td.
 Pakland, DE 13507</h6>
