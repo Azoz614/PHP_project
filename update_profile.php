@@ -1,6 +1,6 @@
 <?php
 session_start();
-include 'db.php'; // ✅ Connect to your existing DB file
+include 'db.php'; 
 
 // Redirect if not logged in
 if (!isset($_SESSION['user'])) {
@@ -18,7 +18,7 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
   $password = $_POST['password'];
   $user_id = $user['id'];
 
-  // Verify password
+
   $stmt = $conn->prepare("SELECT password FROM users WHERE id=?");
   $stmt->bind_param("i", $user_id);
   $stmt->execute();
@@ -28,7 +28,7 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
   if (!password_verify($password, $db_user['password'])) {
     $message = "<div class='alert alert-danger text-center'>❌ Incorrect password. Changes not saved.</div>";
   } else {
-    // Handle profile picture upload
+
     $file_name = $user['profile_pic'];
     if (!empty($_FILES['profile_pic']['name'])) {
       $target_dir = "uploads/";
@@ -37,18 +37,18 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
       move_uploaded_file($_FILES["profile_pic"]["tmp_name"], $target_file);
     }
 
-    // Update user data
+
     $stmt = $conn->prepare("UPDATE users SET first_name=?, last_name=?, email=?, profile_pic=? WHERE id=?");
     $stmt->bind_param("ssssi", $first_name, $last_name, $email, $file_name, $user_id);
 
     if ($stmt->execute()) {
-      // Update session instantly
+
       $_SESSION['user']['first_name'] = $first_name;
       $_SESSION['user']['last_name'] = $last_name;
       $_SESSION['user']['email'] = $email;
       $_SESSION['user']['profile_pic'] = $file_name;
 
-      // ✅ Redirect to index.php with a success message
+
       $_SESSION['profile_updated'] = true;
       header("Location: index.php");
       exit();

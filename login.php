@@ -8,7 +8,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $email = trim($_POST['email']);
     $password = $_POST['password'];
 
-    // ✅ Check if user exists
+ 
     $stmt = $conn->prepare("SELECT * FROM users WHERE email = ?");
     $stmt->bind_param("s", $email);
     $stmt->execute();
@@ -17,11 +17,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     if ($result->num_rows === 1) {
         $user = $result->fetch_assoc();
 
-        // ✅ Verify password
-        if (password_verify($password, $user['password'])) {
-            session_regenerate_id(true); // security
 
-            // ✅ Store user info in session
+        if (password_verify($password, $user['password'])) {
+            session_regenerate_id(true); 
+
+
             $_SESSION['user'] = [
                 'id' => $user['id'],
                 'first_name' => $user['first_name'],
@@ -34,11 +34,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
             $_SESSION['login_time'] = time();
 
-            // ✅ Redirect based on role
+
             if ($user['role'] === 'admin') {
                 header("Location: admin/dashboard.php");
             } else {
-                header("Location: index.php");
+                header("Location: index2.php");
             }
             exit;
         } else {

@@ -1,6 +1,6 @@
 <?php
 session_start();
-include 'db.php'; // ✅ Make sure this file exists and connects to your DB
+include 'db.php'; 
 
 if (!isset($_SESSION['user'])) {
     header("Location: login.php");
@@ -16,11 +16,11 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
     $confirm_password = $_POST['confirm_password'];
     $user_id = $user['id'];
 
-    // Check if passwords match
+
     if ($new_password !== $confirm_password) {
         $message = "<div class='alert alert-danger text-center'>❌ New passwords do not match.</div>";
     } else {
-        // Verify current password
+
         $stmt = $conn->prepare("SELECT password FROM users WHERE id=?");
         $stmt->bind_param("i", $user_id);
         $stmt->execute();
@@ -30,7 +30,7 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
         if (!$db_user || !password_verify($current_password, $db_user['password'])) {
             $message = "<div class='alert alert-danger text-center'>❌ Current password is incorrect.</div>";
         } else {
-            // Update new password
+
             $hashed_password = password_hash($new_password, PASSWORD_DEFAULT);
             $stmt = $conn->prepare("UPDATE users SET password=? WHERE id=?");
             $stmt->bind_param("si", $hashed_password, $user_id);

@@ -14,7 +14,40 @@
   <!-- Google Fonts -->
   <link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@400;600;700&display=swap" rel="stylesheet">
   <!-- Custom CSS -->
-  <link href="css/style.css" rel="stylesheet" />
+  <link href="../css/style.css" rel="stylesheet" />
+  <style>
+   
+.nav-profile img {
+  width: 40px;            
+  height: 40px;
+  object-fit: cover;        
+  border-radius: 50%;       
+  border: 2px solid #ff2d2d; 
+  transition: transform 0.2s ease-in-out;
+}
+
+.nav-profile img:hover {
+  transform: scale(1.05);   
+}
+
+
+.nav-profile {
+  position: relative;
+  margin-left: 15px;
+}
+
+.dropdown-menu {
+  background: #0f0f10;
+  border-radius: 10px;
+  color: #fff;
+}
+
+.dropdown-item:hover {
+  background: rgba(255, 45, 45, 0.15);
+  color: #ff2d2d;
+}
+</style>
+  
 </head>
 <body class="bg-dark text-white">
 
@@ -31,10 +64,75 @@
           <li class="nav-item"><a class="nav-link" href="#latest">Latest</a></li>
           <li class="nav-item"><a class="nav-link" href="#trending">Trending</a></li>
           <li class="nav-item"><a class="nav-link" href="#trailers">Trailers</a></li>
-          <li class="nav-item"><a class="nav-link" href="#contact">Contact</a></li>
+          <li class="nav-item"><a class="nav-link" href="contact.php">Contact</a></li>
         </ul>
       </div>
     </div>
+     <?php if (isset($_SESSION['user'])): 
+          $profile_pic = !empty($_SESSION['user']['profile_pic']) ? $_SESSION['user']['profile_pic'] : 'default.png';
+        ?>
+      
+          <div class="nav-profile dropdown">
+            <a href="#" class="d-flex align-items-center text-white text-decoration-none dropdown-toggle"
+               id="profileDropdown" data-bs-toggle="dropdown" aria-expanded="false">
+              <img src="uploads/<?php echo htmlspecialchars($profile_pic); ?>" 
+                   alt="Profile" class="me-2">
+              <span><?php echo htmlspecialchars($_SESSION['user']['first_name']); ?></span>
+            </a>
+
+  <ul class="dropdown-menu dropdown-menu-end border-0 shadow mt-2 p-3"
+    aria-labelledby="profileDropdown"
+    style="min-width:250px; background:#0f0f10; color:#fff; border-radius:10px;">
+
+  <li class="text-center mb-2">
+    <img src="uploads/<?php echo htmlspecialchars($profile_pic); ?>" 
+         alt="Profile"
+         class="rounded-circle mb-2"
+         style="width:70px; height:70px; object-fit:cover; border:2px solid #ff2d2d;">
+    <div class="fw-bold text-white">
+      <?php echo htmlspecialchars($_SESSION['user']['first_name'] . ' ' . $_SESSION['user']['last_name']); ?>
+    </div>
+    <div class="small text-white-50">
+      <?php echo htmlspecialchars($_SESSION['user']['email']); ?>
+    </div>
+  </li>
+
+  <li><hr class="dropdown-divider" style="border-color:rgba(255,255,255,0.15);"></li>
+
+  <li>
+    <a class="dropdown-item text-white d-flex align-items-center" href="update_profile.php"
+       style="transition:all 0.2s;">
+      <i class="fa fa-user me-2 col_red"></i> Update Profile
+    </a>
+  </li>
+
+  <li>
+    <a class="dropdown-item text-white d-flex align-items-center" href="change_password.php"
+       style="transition:all 0.2s;">
+      <i class="fa fa-lock me-2 col_red"></i> Change Password
+    </a>
+  </li>
+
+  <li><hr class="dropdown-divider" style="border-color:rgba(255,255,255,0.15);"></li>
+
+  <li>
+    <a class="dropdown-item text-white d-flex align-items-center" href="logout.php"
+       style="transition:all 0.2s;">
+      <i class="fa fa-sign-out me-2 col_red"></i> Logout
+    </a>
+  </li>
+</ul>
+
+
+              
+            
+          </div>
+        <?php else: ?>
+          <a class="btn btn-sm btn-danger" href="login.php">Login</a>
+        <?php endif; ?>
+      </div>
+    </div>
+  </div>
   </nav>
 
   <!-- ========================= HERO SECTION ========================= -->
@@ -50,6 +148,7 @@
 
       <div id="searchResults" class="row justify-content-center mt-4"></div>
     </div>
+    
   </section>
 
   <!-- ========================= LATEST MOVIES ========================= -->

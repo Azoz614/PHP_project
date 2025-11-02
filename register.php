@@ -13,7 +13,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
     $profile_pic = 'default.png';
 
-    // Handle profile picture upload
+ 
     if (isset($_FILES['profilePic']) && $_FILES['profilePic']['error'] === 0) {
         $allowed = ['jpg','jpeg','png','gif'];
         $ext = pathinfo($_FILES['profilePic']['name'], PATHINFO_EXTENSION);
@@ -30,13 +30,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         }
     }
 
-    // Password validation
+
     if ($password !== $confirm) {
         $error = "Passwords do not match";
     } elseif (strlen($password) < 6) {
         $error = "Password must be at least 6 characters";
     } else {
-        // Check duplicate email/username
+
         $stmt = $conn->prepare("SELECT id FROM users WHERE email=? OR username=?");
         $stmt->bind_param("ss", $email, $username);
         $stmt->execute();
