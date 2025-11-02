@@ -127,7 +127,7 @@ label {
 
           <div class="text-center mt-4">
             <button type="submit" class="btn btn-red px-4">Update Password</button>
-            <a href="update_profile.php" class="btn btn-secondary ms-2">Cancel</a>
+            <a href="index2.php" class="btn btn-secondary ms-2">Cancel</a>
           </div>
         </form>
       </div>

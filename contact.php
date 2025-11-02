@@ -99,92 +99,129 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['newsletter_submit']))
 	<script src="js/bootstrap.bundle.min.js"></script>
 
 </head>
+<style>
+.nav-profile img {
+  width: 40px;            
+  height: 40px;
+  object-fit: cover;        
+  border-radius: 50%;       
+  border: 2px solid #ff2d2d; 
+  transition: transform 0.2s ease-in-out;
+}
+
+.nav-profile img:hover {
+  transform: scale(1.05);   
+}
+
+
+.nav-profile {
+  position: relative;
+  margin-left: 15px;
+}
+
+.dropdown-menu {
+  background: #0f0f10;
+  border-radius: 10px;
+  color: #fff;
+}
+
+.dropdown-item:hover {
+  background: rgba(255, 45, 45, 0.15);
+  color: #ff2d2d;
+}
+</style>
 <body>
 
 <section id="top">
-<div class="container">
- <div class="row top_1">
-  <div class="col-md-3">
-   <div class="top_1l pt-1">
-    <h3 class="mb-0"><a class="text-white" href="index.html"><i class="fa fa-video-camera col_red me-1"></i> Planet</a></h3>
-   </div>
+
+  <nav class="navbar navbar-expand-lg navbar-dark bg-black py-3 sticky-top border-bottom border-danger">
+    <div class="container">
+      <a class="navbar-brand text-danger fw-bold fs-3" href="#"><img src="img/newlogo.png" style="width:100px;height:70px;"></a>
+      <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+        <span class="navbar-toggler-icon"></span>
+      </button>
+      <div class="collapse navbar-collapse" id="navbarNav">
+        <ul class="navbar-nav ms-auto text-uppercase">
+          <li class="nav-item"><a class="nav-link active" href="index2.php">Home</a></li>
+          <li class="nav-item"><a class="nav-link" href="#latest">Latest</a></li>
+          <li class="nav-item"><a class="nav-link" href="#trending">Trending</a></li>
+          <li class="nav-item"><a class="nav-link" href="#trailers">Trailers</a></li>
+          <li class="nav-item"><a class="nav-link" href="contact.php">Contact</a></li>
+          <li class="nav-item"><a class="nav-link" href="booking.php">Ticket booking</a></li>
+        </ul>
+      </div>
+    </div>
+     <?php if (isset($_SESSION['user'])): 
+          $profile_pic = !empty($_SESSION['user']['profile_pic']) ? $_SESSION['user']['profile_pic'] : 'default.png';
+        ?>
+      
+          <div class="nav-profile dropdown">
+            <a href="#" class="d-flex align-items-center text-white text-decoration-none dropdown-toggle"
+               id="profileDropdown" data-bs-toggle="dropdown" aria-expanded="false">
+              <img src="uploads/<?php echo htmlspecialchars($profile_pic); ?>" 
+                   alt="Profile" class="me-2">
+              <span><?php echo htmlspecialchars($_SESSION['user']['first_name']); ?></span>
+            </a>
+
+  <ul class="dropdown-menu dropdown-menu-end border-0 shadow mt-2 p-3"
+    aria-labelledby="profileDropdown"
+    style="min-width:250px; background:#0f0f10; color:#fff; border-radius:10px;">
+
+  <li class="text-center mb-2">
+    <img src="uploads/<?php echo htmlspecialchars($profile_pic); ?>" 
+         alt="Profile"
+         class="rounded-circle mb-2"
+         style="width:70px; height:70px; object-fit:cover; border:2px solid #ff2d2d;">
+    <div class="fw-bold text-white">
+      <?php echo htmlspecialchars($_SESSION['user']['first_name'] . ' ' . $_SESSION['user']['last_name']); ?>
+    </div>
+    <div class="small text-white-50">
+      <?php echo htmlspecialchars($_SESSION['user']['email']); ?>
+    </div>
+  </li>
+
+  <li><hr class="dropdown-divider" style="border-color:rgba(255,255,255,0.15);"></li>
+
+  <li>
+    <a class="dropdown-item text-white d-flex align-items-center" href="update_profile.php"
+       style="transition:all 0.2s;">
+      <i class="fa fa-user me-2 col_red"></i> Update Profile
+    </a>
+  </li>
+
+  <li>
+    <a class="dropdown-item text-white d-flex align-items-center" href="change_password.php"
+       style="transition:all 0.2s;">
+      <i class="fa fa-lock me-2 col_red"></i> Change Password
+    </a>
+  </li>
+
+  <li><hr class="dropdown-divider" style="border-color:rgba(255,255,255,0.15);"></li>
+
+  <li>
+    <a class="dropdown-item text-white d-flex align-items-center" href="logout.php"
+       style="transition:all 0.2s;">
+      <i class="fa fa-sign-out me-2 col_red"></i> Logout
+    </a>
+  </li>
+</ul>
+
+
+              
+            
+          </div>
+        <?php else: ?>
+          <a class="btn btn-sm btn-danger" href="login.php">Login</a>
+        <?php endif; ?>
+      </div>
+    </div>
   </div>
-  <div class="col-md-5">
-   <div class="top_1m">
-    <div class="input-group">
-				<input type="text" class="form-control bg-black" placeholder="Search Site...">
-				<span class="input-group-btn">
-					<button class="btn btn text-white bg_red rounded-0 border-0" type="button">
-						 Search</button>
-				</span>
-		</div>
-   </div>
-  </div>
-  <div class="col-md-4">
-   <div class="top_1r text-end">
-     <ul class="social-network social-circle mb-0">
-			<li><a href="#" class="icoRss" title="Rss"><i class="fa fa-instagram"></i></a></li>
-			<li><a href="#" class="icoFacebook" title="Facebook"><i class="fa fa-facebook"></i></a></li>
-			<li><a href="#" class="icoTwitter" title="Twitter"><i class="fa fa-twitter"></i></a></li>
-			<li><a href="#" class="icoGoogle" title="Google +"><i class="fa fa-youtube"></i></a></li>
-			<li><a href="#" class="icoLinkedin" title="Linkedin"><i class="fa fa-linkedin"></i></a></li>
-		</ul>
-   </div>
-  </div>
+  </nav>
  </div>
 </div>
 </section>
 
-<section id="header">
-<nav class="navbar navbar-expand-md navbar-light" id="navbar_sticky">
-  <div class="container">
-    <a class="navbar-brand text-white fw-bold" href="index.html"><i class="fa fa-video-camera col_red me-1"></i> Planet</a>
-    <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
-      <span class="navbar-toggler-icon"></span>
-    </button>
-    <div class="collapse navbar-collapse" id="navbarSupportedContent">
-      <ul class="navbar-nav mb-0">
-        <li class="nav-item">
-          <a class="nav-link" aria-current="page" href="index.html">Home</a>
-        </li>
-		<li class="nav-item">
-          <a class="nav-link" href="about.html">About Us</a>
-        </li>
-        <li class="nav-item dropdown">
-          <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
-            Blog
-          </a>
-          <ul class="dropdown-menu drop_1" aria-labelledby="navbarDropdown">
-            <li><a class="dropdown-item" href="blog.html">Blog</a></li>
-            <li><a class="dropdown-item border-0" href="blog_detail.html">Blog Detail</a></li>
-          </ul>
-        </li>
-		<li class="nav-item">
-          <a class="nav-link" href="services.html">Services</a>
-        </li>
-		<li class="nav-item">
-          <a class="nav-link" href="team.html">Team</a>
-        </li>
-		<li class="nav-item dropdown">
-          <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
-            Pages
-          </a>
-          <ul class="dropdown-menu drop_1" aria-labelledby="navbarDropdown">
-            <li><a class="dropdown-item" href="about.html">About Us</a></li>
-            <li><a class="dropdown-item" href="services.html">Services</a></li>
-			<li><a class="dropdown-item" href="team.html">Team</a></li>
-            <li><a class="dropdown-item border-0" href="contact.html">Contact</a></li>
-          </ul>
-        </li>
-		
-		<li class="nav-item">
-          <a class="nav-link active" href="contact.html">Contact Us</a>
-        </li>
-      </ul>
-    </div>
-  </div>
-</nav>
-</section>
+
 
 <section id="center" class="center_o pt-2 pb-2">
  <div class="container-xl">

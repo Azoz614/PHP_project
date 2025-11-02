@@ -118,7 +118,7 @@ button, .btn { border-radius:4px; }
 <div class="container">
  <div class="row align-items-center">
   <div class="col-md-3">
-   <a href="index.php"><img src="img/newlogo.png" style="width:100px;height:70px;"></a>
+   <a href="index2.php"><img src="img/newlogo.png" style="width:100px;height:70px;"></a>
   </div>
   <div class="col-md-5">
    <div class="input-group"></div>

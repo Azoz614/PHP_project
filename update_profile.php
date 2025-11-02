@@ -155,7 +155,7 @@ body {
 
           <div class="text-center">
             <button type="submit" class="btn btn-red px-4">Save Changes</button>
-            <a href="index.php" class="btn btn-secondary ms-2">Cancel</a>
+            <a href="index2.php" class="btn btn-secondary ms-2">Cancel</a>
           </div>
         </form>
       </div>

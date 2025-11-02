@@ -54,7 +54,7 @@
   <!-- ========================= NAVBAR ========================= -->
   <nav class="navbar navbar-expand-lg navbar-dark bg-black py-3 sticky-top border-bottom border-danger">
     <div class="container">
-      <a class="navbar-brand text-danger fw-bold fs-3" href="#">🎬 Flick-Fix</a>
+      <a class="navbar-brand text-danger fw-bold fs-3" href="#"><img src="img/newlogo.png" style="width:100px;height:70px;"></a>
       <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
         <span class="navbar-toggler-icon"></span>
       </button>
@@ -65,6 +65,7 @@
           <li class="nav-item"><a class="nav-link" href="#trending">Trending</a></li>
           <li class="nav-item"><a class="nav-link" href="#trailers">Trailers</a></li>
           <li class="nav-item"><a class="nav-link" href="contact.php">Contact</a></li>
+          <li class="nav-item"><a class="nav-link" href="booking.php">Ticket booking</a></li>
         </ul>
       </div>
     </div>
@@ -160,7 +161,7 @@
         <!-- ========== Movie Card 1 ========== -->
         <div class="col-md-4">
           <div class="card bg-black border border-danger">
-            <img src="img/leo.jpg" class="card-img-top" alt="Leo">
+            <img src="uploads/leo.jpg" class="card-img-top" alt="Leo">
             <div class="card-body">
               <h5 class="card-title text-danger">Leo</h5>
               <p class="card-text">A man with a mysterious past faces violent forces from his previous life.</p>
@@ -184,7 +185,7 @@
         <!-- ========== Movie Card 2 ========== -->
         <div class="col-md-4">
           <div class="card bg-black border border-danger">
-            <img src="img/jailer.jpg" class="card-img-top" alt="Jailer">
+            <img src="uploads/jailer.webp" class="card-img-top" alt="Jailer">
             <div class="card-body">
               <h5 class="card-title text-danger">Jailer</h5>
               <p class="card-text">A retired jailer sets out to find his missing son, leading to an unexpected clash.</p>
@@ -240,7 +241,7 @@
       <div class="row g-4">
         <div class="col-md-3">
           <div class="card bg-dark border border-danger">
-            <img src="img/killi.jpg" class="card-img-top" alt="Ponniyin Selvan 2">
+            <img src="img/gilli.webp" class="card-img-top" alt="Ponniyin Selvan 2">
             <div class="card-body text-center">
               <h6 class="text-danger">Gilli</h6>
             </div>
@@ -248,7 +249,7 @@
         </div>
         <div class="col-md-3">
           <div class="card bg-dark border border-danger">
-            <img src="img/varisu.jpg" class="card-img-top" alt="Varisu">
+            <img src="img/varisu.webp" class="card-img-top" alt="Varisu">
             <div class="card-body text-center">
               <h6 class="text-danger">Varisu</h6>
             </div>
@@ -256,7 +257,7 @@
         </div>
         <div class="col-md-3">
           <div class="card bg-dark border border-danger">
-            <img src="img/vikramvedha.jpg" class="card-img-top" alt="Vikram Vedha">
+            <img src="img/vikramveda.webp" class="card-img-top" alt="Vikram Vedha">
             <div class="card-body text-center">
               <h6 class="text-danger">Vikram Vedha</h6>
             </div>
@@ -264,7 +265,7 @@
         </div>
         <div class="col-md-3">
           <div class="card bg-dark border border-danger">
-            <img src="img/master.jpg" class="card-img-top" alt="Master">
+            <img src="img/master.webp" class="card-img-top" alt="Master">
             <div class="card-body text-center">
               <h6 class="text-danger">Master</h6>
             </div>
