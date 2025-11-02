@@ -22,7 +22,7 @@ CREATE TABLE bookings (
     theater_id INT NOT NULL,
     showtime_id INT NOT NULL,
     seat_number VARCHAR(10) NOT NULL,
-    booking_date DATETIME DEFAULT CURRENT_TIMESTAMP,
+    booking_date DATETIME DEFAULT CURRENT_TIMESTAMP);
 	
 
 

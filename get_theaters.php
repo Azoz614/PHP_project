@@ -1,5 +1,5 @@
 <?php
-$conn = new mysqli("localhost", "root", "", "movie_booking");
+$conn = new mysqli("localhost", "root", "", "flick-fix");
 if ($conn->connect_error) {
   die(json_encode(["error" => "Connection failed: " . $conn->connect_error]));
 }
