@@ -142,10 +142,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['newsletter_submit']))
       </button>
       <div class="collapse navbar-collapse" id="navbarNav">
         <ul class="navbar-nav ms-auto text-uppercase">
-          <li class="nav-item"><a class="nav-link active" href="index2.php">Home</a></li>
-          <li class="nav-item"><a class="nav-link" href="#latest">Latest</a></li>
-          <li class="nav-item"><a class="nav-link" href="#trending">Trending</a></li>
-          <li class="nav-item"><a class="nav-link" href="#trailers">Trailers</a></li>
+          <li class="nav-item"><a class="nav-link active" href="index.php">Home</a></li>
           <li class="nav-item"><a class="nav-link" href="contact.php">Contact</a></li>
           <li class="nav-item"><a class="nav-link" href="booking.php">Ticket booking</a></li>
         </ul>
@@ -233,7 +230,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['newsletter_submit']))
    </div>
    <div class="col-md-7">
      <div class="center_o1r text-end">
-	  <h6 class="mb-0 col_red"><a href="#">Home</a> <span class="me-2 ms-2 text-light"><i class="fa fa-caret-right align-middle"></i></span> Contact</h6>
+
 	 </div>
    </div>
   </div>

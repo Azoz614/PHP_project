@@ -130,7 +130,7 @@ body {font-family:'Rajdhani',sans-serif; background:#030303; color:#fff;}
       <ul class="navbar-nav mb-0">
         <li class="nav-item"><a class="nav-link active" href="index.php">Home</a></li>
         <li class="nav-item"><a class="nav-link" href="about.html">About Us</a></li>
-        <li class="nav-item"><a class="nav-link" href="contact.html">Contact Us</a></li>
+        <li class="nav-item"><a class="nav-link" href="contact.php">Contact Us</a></li>
         <li class="nav-item"><a class="nav-link" href="booking.php"> Ticket booking</a></li>
 
 
@@ -150,7 +150,7 @@ body {font-family:'Rajdhani',sans-serif; background:#030303; color:#fff;}
   </div>
   <div class="carousel-inner">
     <div class="carousel-item active">
-      <img src="img/eleven.jpg" class="d-block w-100" alt="...">
+      <img src="img/dragon.png" class="d-block w-100" alt="...">
       <div class="carousel-caption d-md-block">
        <h1 class="font_60"> Entertainment FLICK-FIX</h1>
 	   <h6 class="mt-3">
