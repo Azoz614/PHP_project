@@ -198,7 +198,7 @@ function loadMovies(filters={}){
   movies.forEach(m=>{
     const col=document.createElement('div');col.className='col-6 col-md-4';
     col.innerHTML=`<div class="bg-dark p-2 rounded">
-      <div class="movie-thumb" style="height:220px"><img src="img/${esc(m.poster||'placeholder.jpg')}" alt="${esc(m.title)}"></div>
+      <div class="movie-thumb" style="height:220px"><img src="uploads/${esc(m.poster||'placeholder.jpg')}" alt="${esc(m.title)}"></div>
       <div class="mt-2"><strong>${esc(m.title)}</strong><br><small>${esc(m.genre||'Unknown')} • ${m.year||''}</small></div>
       <div class="d-flex justify-content-between align-items-center mt-2">
         <button class="btn btn-sm btn-accent btn-watchlist" data-id="${m.id}">🔖 Save</button>
@@ -221,7 +221,7 @@ function renderMoviesByGenre(){
       genreMovies.map(m=>`
         <div class="col-6 col-md-4">
           <div class="bg-dark p-2 rounded">
-            <div class="movie-thumb" style="height:200px"><img src="img/${esc(m.poster||'placeholder.jpg')}"></div>
+            <div class="movie-thumb" style="height:200px"><img src="uploads/${esc(m.poster||'placeholder.jpg')}"></div>
             <div class="mt-1"><strong>${esc(m.title)}</strong></div>
             <button class="btn btn-sm btn-accent btn-watchlist mt-1" data-id="${m.id}">🔖 Save</button>
           </div>
@@ -259,7 +259,7 @@ async function loadActors(){
   res.data.forEach(a=>{
     const col=document.createElement('div');col.className='col-md-6';
     col.innerHTML=`<div class="actor-card bg-dark p-2 text-center">
-      <img src="img/${esc(a.photo||'placeholder.jpg')}" alt="${esc(a.ac_name)}">
+      <img src="uploads/${esc(a.photo||'placeholder.jpg')}" alt="${esc(a.ac_name)}">
       <h6 class="mt-2 text-danger">${esc(a.ac_name)}</h6>
       <p class="small text-muted mb-1">${esc(a.lives_in)}</p>
       <p class="small">🎬 ${esc(a.latest_film)}</p>

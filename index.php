@@ -1,200 +1,6 @@
 <?php
 session_start();
-include 'db.php'; // expects $conn (mysqli)
-header('X-Content-Type-Options: nosniff');
-
-/*
-  AJAX handlers (GET/POST via ?action=...)
-  - get_mood_suggestion  (POST: mood)
-  - get_quiz             (GET) -> returns quiz HTML (optional)
-  - quiz_submit          (POST: answers[])
-  - spin_wheel           (GET) -> returns random movie
-  - poll_vote            (POST: poll_id, option_id)
-  - poll_results         (GET: poll_id)
-  - get_upcoming         (GET) -> upcoming releases (JSON)
-*/
-
-if (isset($_GET['action'])) {
-    $action = $_GET['action'];
-    if ($action === 'get_mood_suggestion' && $_SERVER['REQUEST_METHOD'] === 'POST') {
-        $mood = $_POST['mood'] ?? '';
-        $mood = trim($mood);
-        if ($mood === '') {
-            echo json_encode(['status'=>'error','msg'=>'No mood provided']);
-            exit;
-        }
-        // fetch a random movie for the mood
-        $stmt = $conn->prepare("SELECT movie_title FROM mood_movies WHERE mood = ? ORDER BY RAND() LIMIT 1");
-        $stmt->bind_param('s', $mood);
-        $stmt->execute();
-        $res = $stmt->get_result();
-        if ($row = $res->fetch_assoc()) {
-            $movie = $row['movie_title'];
-            $html = '<div class="mood-suggest card bg_grey p-3 text-white shadow-sm animate__animated animate__fadeIn">
-                        <h5 class="mb-1">Feeling '.htmlspecialchars($mood).'?</h5>
-                        <p class="lead mb-2">Then watch <span class="col_red fw-bold">"'.htmlspecialchars($movie).'"</span></p>
-                        <a href="search_results.php?title='.urlencode($movie).'" class="button">View Movie</a>
-                     </div>';
-            echo json_encode(['status'=>'ok','html'=>$html]);
-        } else {
-            echo json_encode(['status'=>'ok','html'=>'<div class="text-white small">No suggestion found for that mood yet.</div>']);
-        }
-        exit;
-    }
-
-    if ($action === 'get_quiz' && $_SERVER['REQUEST_METHOD'] === 'GET') {
-        // return quiz questions & options (HTML fragment)
-        $questions = [];
-        $qres = $conn->query("SELECT id, question_text FROM quiz_questions ORDER BY id LIMIT 3");
-        while ($q = $qres->fetch_assoc()) {
-            $qid = (int)$q['id'];
-            $opts = [];
-            $ores = $conn->prepare("SELECT id, option_text FROM quiz_options WHERE question_id = ?");
-            $ores->bind_param('i',$qid);
-            $ores->execute();
-            $or = $ores->get_result();
-            while ($o = $or->fetch_assoc()) $opts[] = $o;
-            $questions[] = ['id'=>$qid, 'q'=>$q['question_text'], 'opts'=>$opts];
-        }
-        // generate HTML
-        ob_start();
-        foreach ($questions as $i => $q) {
-            ?>
-            <div class="quiz-question mb-3">
-              <h6 class="mb-2"><?php echo ($i+1) .'. '. htmlspecialchars($q['q']); ?></h6>
-              <?php foreach($q['opts'] as $opt): ?>
-                <div class="form-check">
-                  <input class="form-check-input" type="radio" name="q_<?php echo $q['id']; ?>" id="opt_<?php echo $opt['id']; ?>" value="<?php echo $opt['id']; ?>">
-                  <label class="form-check-label" for="opt_<?php echo $opt['id']; ?>">
-                    <?php echo htmlspecialchars($opt['option_text']); ?>
-                  </label>
-                </div>
-              <?php endforeach; ?>
-            </div>
-            <?php
-        }
-        $html = ob_get_clean();
-        echo json_encode(['status'=>'ok','html'=>$html]);
-        exit;
-    }
-
-    if ($action === 'quiz_submit' && $_SERVER['REQUEST_METHOD'] === 'POST') {
-        // expects answers[] => array of option_id
-        $answers = $_POST['answers'] ?? [];
-        if (!is_array($answers) || count($answers) === 0) {
-            echo json_encode(['status'=>'error','msg'=>'Please answer the quiz.']);
-            exit;
-        }
-        // we will count mapped_movie frequency
-        $placeholders = implode(',', array_fill(0, count($answers), '?'));
-        $types = str_repeat('i', count($answers));
-        $sql = "SELECT mapped_movie FROM quiz_options WHERE id IN ($placeholders)";
-        $stmt = $conn->prepare($sql);
-        $stmt->bind_param($types, ...$answers);
-        $stmt->execute();
-        $res = $stmt->get_result();
-        $counts = [];
-        while ($r = $res->fetch_assoc()) {
-            $m = $r['mapped_movie'] ?? '';
-            if ($m==='') continue;
-            if (!isset($counts[$m])) $counts[$m]=0;
-            $counts[$m]++;
-        }
-        if (count($counts) === 0) {
-            echo json_encode(['status'=>'ok','html'=>'<div class="text-white small">No recommendation could be generated.</div>']);
-            exit;
-        }
-        // pick movie with highest votes
-        arsort($counts);
-        $top_movie = array_key_first($counts);
-        $html = '<div class="card bg_grey p-3 text-white shadow-sm animate__animated animate__zoomIn">
-                    <h5 class="mb-1">Recommended for you</h5>
-                    <p class="lead mb-2">Based on your answers, watch <span class="col_red fw-bold">"'.htmlspecialchars($top_movie).'"</span></p>
-                    <a href="search_results.php?title='.urlencode($top_movie).'" class="button">View Movie</a>
-                 </div>';
-        echo json_encode(['status'=>'ok','html'=>$html]);
-        exit;
-    }
-
-    if ($action === 'spin_wheel' && $_SERVER['REQUEST_METHOD'] === 'GET') {
-        // Prefer spin_pool if exists; else fallback to movies table
-        $res = $conn->query("SELECT movie_title, poster FROM spin_pool ORDER BY RAND() LIMIT 1");
-        if ($res && $row = $res->fetch_assoc()) {
-            echo json_encode(['status'=>'ok','title'=>$row['movie_title'],'poster'=>$row['poster']]);
-            exit;
-        }
-        $res2 = $conn->query("SELECT title, poster FROM movies ORDER BY RAND() LIMIT 1");
-        if ($res2 && $r2 = $res2->fetch_assoc()) {
-            echo json_encode(['status'=>'ok','title'=>$r2['title'],'poster'=>$r2['poster']]);
-            exit;
-        }
-        echo json_encode(['status'=>'error','msg'=>'No movies available for spin.']);
-        exit;
-    }
-
-    if ($action === 'poll_vote' && $_SERVER['REQUEST_METHOD'] === 'POST') {
-        $poll_id = intval($_POST['poll_id'] ?? 0);
-        $option_id = intval($_POST['option_id'] ?? 0);
-        if ($poll_id <= 0 || $option_id <= 0) {
-            echo json_encode(['status'=>'error','msg'=>'Invalid vote.']);
-            exit;
-        }
-        // optional prevent repeat by same user: use session id
-        $user_ident = session_id();
-        // (You can add more robust prevention if logged in: use user_id)
-        $stmt = $conn->prepare("INSERT INTO poll_votes (poll_id, option_id, user_identifier) VALUES (?, ?, ?)");
-        $stmt->bind_param('iis', $poll_id, $option_id, $user_ident);
-        if ($stmt->execute()) {
-            echo json_encode(['status'=>'ok']);
-        } else {
-            echo json_encode(['status'=>'error','msg'=>'Could not save vote.']);
-        }
-        exit;
-    }
-
-    if ($action === 'poll_results' && $_SERVER['REQUEST_METHOD'] === 'GET') {
-        $poll_id = intval($_GET['poll_id'] ?? 0);
-        if ($poll_id <= 0) {
-            echo json_encode(['status'=>'error','msg'=>'Invalid poll id.']);
-            exit;
-        }
-        // get options + counts
-        $sql = "SELECT po.id, po.option_text, COUNT(pv.id) AS votes
-                FROM poll_options po
-                LEFT JOIN poll_votes pv ON po.id = pv.option_id
-                WHERE po.poll_id = ?
-                GROUP BY po.id ORDER BY po.id";
-        $stmt = $conn->prepare($sql);
-        $stmt->bind_param('i', $poll_id);
-        $stmt->execute();
-        $res = $stmt->get_result();
-        $options = [];
-        $total = 0;
-        while ($r = $res->fetch_assoc()) {
-            $options[] = $r;
-            $total += (int)$r['votes'];
-        }
-        echo json_encode(['status'=>'ok','total'=>$total,'options'=>$options]);
-        exit;
-    }
-
-    if ($action === 'get_upcoming' && $_SERVER['REQUEST_METHOD'] === 'GET') {
-        // return up to 3 upcoming releases
-        $now = date('Y-m-d H:i:s');
-        $stmt = $conn->prepare("SELECT id, title, release_date, poster FROM upcoming_releases WHERE release_date > ? ORDER BY release_date ASC LIMIT 3");
-        $stmt->bind_param('s', $now);
-        $stmt->execute();
-        $res = $stmt->get_result();
-        $items = [];
-        while ($r = $res->fetch_assoc()) $items[] = $r;
-        echo json_encode(['status'=>'ok','items'=>$items]);
-        exit;
-    }
-
-    // unknown action
-    echo json_encode(['status'=>'error','msg'=>'Unknown action']);
-    exit;
-}
+include 'db.php';
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -208,8 +14,6 @@ if (isset($_GET['action'])) {
 <link href="css/global.css" rel="stylesheet">
 <link href="css/index.css" rel="stylesheet">
 <link href="https://fonts.googleapis.com/css2?family=Rajdhani&display=swap" rel="stylesheet">
-<!-- animate.css for simple animations -->
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css"/>
 <script src="js/bootstrap.bundle.min.js"></script>
 <style>
 body {font-family:'Rajdhani',sans-serif; background:#030303; color:#fff;}
@@ -218,15 +22,6 @@ body {font-family:'Rajdhani',sans-serif; background:#030303; color:#fff;}
 .bg_red {background-color:#ff2d2d;}
 .bg_grey {background-color:#1a1a1a;}
 .button {background:#ff2d2d;color:#fff;padding:6px 15px;border-radius:4px;text-decoration:none;}
-/* NEW: widget cards */
-.widget-card {border-radius:12px; padding:18px; background: linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.00)); box-shadow: 0 6px 18px rgba(0,0,0,0.6); border:1px solid rgba(255,255,255,0.03);}
-.mood-buttons .btn {margin-right:8px;margin-bottom:8px;}
-#spinWheel {width:220px;height:220px;border-radius:50%;display:flex;align-items:center;justify-content:center;cursor:pointer;border:8px solid rgba(255,255,255,0.03);background:conic-gradient(#ff2d2d 0 25%, rgba(255,255,255,0.02) 25% 50%, #111 50% 75%, rgba(255,255,255,0.02) 75% 100%);}
-.spin-result {min-height:120px;}
-.countdown {font-weight:700;font-size:18px;}
-.poll-option {cursor:pointer;}
-/* small responsive */
-@media (max-width: 991px){ .top_1m .input-group{width:100%!important} .carousel-caption{display:none} }
 </style>
 </head>
 <body>
@@ -337,6 +132,7 @@ body {font-family:'Rajdhani',sans-serif; background:#030303; color:#fff;}
         <li class="nav-item"><a class="nav-link" href="about.html">About Us</a></li>
         <li class="nav-item"><a class="nav-link" href="contact.php">Contact Us</a></li>
         <li class="nav-item"><a class="nav-link" href="booking.php"> Ticket booking</a></li>
+        <li class="nav-item"><a class="nav-link" href="service.php"> Service</a></li>
 
 
       </ul>
@@ -355,7 +151,7 @@ body {font-family:'Rajdhani',sans-serif; background:#030303; color:#fff;}
   </div>
   <div class="carousel-inner">
     <div class="carousel-item active">
-      <img src="img/dragon.png" class="d-block w-100" alt="...">
+      <img src="uploads/eleven.jpg" class="d-block w-100" alt="...">
       <div class="carousel-caption d-md-block">
        <h1 class="font_60"> Entertainment FLICK-FIX</h1>
 	   <h6 class="mt-3">
@@ -377,7 +173,7 @@ body {font-family:'Rajdhani',sans-serif; background:#030303; color:#fff;}
       </div>
     </div>
     <div class="carousel-item">
-      <img src="img/pushpa.png" class="d-block w-100" alt="...">
+      <img src="uploads/pushpa.png" class="d-block w-100" alt="...">
       <div class="carousel-caption d-md-block">
        <h1 class="font_60"> Lorem Semper Nulla</h1>
 	   <h6 class="mt-3">
@@ -399,7 +195,7 @@ body {font-family:'Rajdhani',sans-serif; background:#030303; color:#fff;}
       </div>
     </div>
     <div class="carousel-item">
-      <img src="img/kaththi.jpg" class="d-block w-100" alt="...">
+      <img src="uploads/kaththi.jpg" class="d-block w-100" alt="...">
       <div class="carousel-caption d-md-block">
        <h1 class="font_60"> Eget Diam Ipsum</h1>
 	   <h6 class="mt-3">
@@ -497,6 +293,7 @@ body {font-family:'Rajdhani',sans-serif; background:#030303; color:#fff;}
     </div>
   </div>
 </section>
+
 
 <!-- =================== NEW FEATURES SECTION (placed inside #upcome) =================== -->
 <section id="upcome" class="pt-4 pb-5">
@@ -625,6 +422,10 @@ Pakland, DE 13507</h6>
 </div>
 </section>
 
+
+
+
+
 <section id="footer_b" class="pt-3 pb-3 bg_grey">
 <div class="container">
    <div class="row footer_1">
@@ -656,6 +457,40 @@ function myFunction() {
 </script>
 
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script>
+$(document).ready(function(){
+    $('#movieSearch').on('keyup', function(){
+        var term = $(this).val();
+        if(term.length > 1){
+            $.ajax({
+                url: 'search.php',
+                method: 'GET',
+                data: {term: term},
+                success: function(data){
+                    $('#searchResults').html(data);
+                }
+            });
+        } else {
+            $('#searchResults').html('');
+        }
+    });
+
+    // Optional: search button click
+    $('#searchBtn').on('click', function(){
+        var term = $('#movieSearch').val();
+        if(term.length > 0){
+            $.ajax({
+                url: 'search.php',
+                method: 'GET',
+                data: {term: term},
+                success: function(data){
+                    $('#searchResults').html(data);
+                }
+            });
+        }
+    });
+});
+
 <script>
 $(document).ready(function(){
 
@@ -832,6 +667,9 @@ $(document).ready(function(){
 
 });
 </script>
+</script>
+
 
 </body>
+
 </html>
