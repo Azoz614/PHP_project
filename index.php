@@ -1,6 +1,200 @@
 <?php
 session_start();
-include 'db.php';
+include 'db.php'; // expects $conn (mysqli)
+header('X-Content-Type-Options: nosniff');
+
+/*
+  AJAX handlers (GET/POST via ?action=...)
+  - get_mood_suggestion  (POST: mood)
+  - get_quiz             (GET) -> returns quiz HTML (optional)
+  - quiz_submit          (POST: answers[])
+  - spin_wheel           (GET) -> returns random movie
+  - poll_vote            (POST: poll_id, option_id)
+  - poll_results         (GET: poll_id)
+  - get_upcoming         (GET) -> upcoming releases (JSON)
+*/
+
+if (isset($_GET['action'])) {
+    $action = $_GET['action'];
+    if ($action === 'get_mood_suggestion' && $_SERVER['REQUEST_METHOD'] === 'POST') {
+        $mood = $_POST['mood'] ?? '';
+        $mood = trim($mood);
+        if ($mood === '') {
+            echo json_encode(['status'=>'error','msg'=>'No mood provided']);
+            exit;
+        }
+        // fetch a random movie for the mood
+        $stmt = $conn->prepare("SELECT movie_title FROM mood_movies WHERE mood = ? ORDER BY RAND() LIMIT 1");
+        $stmt->bind_param('s', $mood);
+        $stmt->execute();
+        $res = $stmt->get_result();
+        if ($row = $res->fetch_assoc()) {
+            $movie = $row['movie_title'];
+            $html = '<div class="mood-suggest card bg_grey p-3 text-white shadow-sm animate__animated animate__fadeIn">
+                        <h5 class="mb-1">Feeling '.htmlspecialchars($mood).'?</h5>
+                        <p class="lead mb-2">Then watch <span class="col_red fw-bold">"'.htmlspecialchars($movie).'"</span></p>
+                        <a href="search_results.php?title='.urlencode($movie).'" class="button">View Movie</a>
+                     </div>';
+            echo json_encode(['status'=>'ok','html'=>$html]);
+        } else {
+            echo json_encode(['status'=>'ok','html'=>'<div class="text-white small">No suggestion found for that mood yet.</div>']);
+        }
+        exit;
+    }
+
+    if ($action === 'get_quiz' && $_SERVER['REQUEST_METHOD'] === 'GET') {
+        // return quiz questions & options (HTML fragment)
+        $questions = [];
+        $qres = $conn->query("SELECT id, question_text FROM quiz_questions ORDER BY id LIMIT 3");
+        while ($q = $qres->fetch_assoc()) {
+            $qid = (int)$q['id'];
+            $opts = [];
+            $ores = $conn->prepare("SELECT id, option_text FROM quiz_options WHERE question_id = ?");
+            $ores->bind_param('i',$qid);
+            $ores->execute();
+            $or = $ores->get_result();
+            while ($o = $or->fetch_assoc()) $opts[] = $o;
+            $questions[] = ['id'=>$qid, 'q'=>$q['question_text'], 'opts'=>$opts];
+        }
+        // generate HTML
+        ob_start();
+        foreach ($questions as $i => $q) {
+            ?>
+            <div class="quiz-question mb-3">
+              <h6 class="mb-2"><?php echo ($i+1) .'. '. htmlspecialchars($q['q']); ?></h6>
+              <?php foreach($q['opts'] as $opt): ?>
+                <div class="form-check">
+                  <input class="form-check-input" type="radio" name="q_<?php echo $q['id']; ?>" id="opt_<?php echo $opt['id']; ?>" value="<?php echo $opt['id']; ?>">
+                  <label class="form-check-label" for="opt_<?php echo $opt['id']; ?>">
+                    <?php echo htmlspecialchars($opt['option_text']); ?>
+                  </label>
+                </div>
+              <?php endforeach; ?>
+            </div>
+            <?php
+        }
+        $html = ob_get_clean();
+        echo json_encode(['status'=>'ok','html'=>$html]);
+        exit;
+    }
+
+    if ($action === 'quiz_submit' && $_SERVER['REQUEST_METHOD'] === 'POST') {
+        // expects answers[] => array of option_id
+        $answers = $_POST['answers'] ?? [];
+        if (!is_array($answers) || count($answers) === 0) {
+            echo json_encode(['status'=>'error','msg'=>'Please answer the quiz.']);
+            exit;
+        }
+        // we will count mapped_movie frequency
+        $placeholders = implode(',', array_fill(0, count($answers), '?'));
+        $types = str_repeat('i', count($answers));
+        $sql = "SELECT mapped_movie FROM quiz_options WHERE id IN ($placeholders)";
+        $stmt = $conn->prepare($sql);
+        $stmt->bind_param($types, ...$answers);
+        $stmt->execute();
+        $res = $stmt->get_result();
+        $counts = [];
+        while ($r = $res->fetch_assoc()) {
+            $m = $r['mapped_movie'] ?? '';
+            if ($m==='') continue;
+            if (!isset($counts[$m])) $counts[$m]=0;
+            $counts[$m]++;
+        }
+        if (count($counts) === 0) {
+            echo json_encode(['status'=>'ok','html'=>'<div class="text-white small">No recommendation could be generated.</div>']);
+            exit;
+        }
+        // pick movie with highest votes
+        arsort($counts);
+        $top_movie = array_key_first($counts);
+        $html = '<div class="card bg_grey p-3 text-white shadow-sm animate__animated animate__zoomIn">
+                    <h5 class="mb-1">Recommended for you</h5>
+                    <p class="lead mb-2">Based on your answers, watch <span class="col_red fw-bold">"'.htmlspecialchars($top_movie).'"</span></p>
+                    <a href="search_results.php?title='.urlencode($top_movie).'" class="button">View Movie</a>
+                 </div>';
+        echo json_encode(['status'=>'ok','html'=>$html]);
+        exit;
+    }
+
+    if ($action === 'spin_wheel' && $_SERVER['REQUEST_METHOD'] === 'GET') {
+        // Prefer spin_pool if exists; else fallback to movies table
+        $res = $conn->query("SELECT movie_title, poster FROM spin_pool ORDER BY RAND() LIMIT 1");
+        if ($res && $row = $res->fetch_assoc()) {
+            echo json_encode(['status'=>'ok','title'=>$row['movie_title'],'poster'=>$row['poster']]);
+            exit;
+        }
+        $res2 = $conn->query("SELECT title, poster FROM movies ORDER BY RAND() LIMIT 1");
+        if ($res2 && $r2 = $res2->fetch_assoc()) {
+            echo json_encode(['status'=>'ok','title'=>$r2['title'],'poster'=>$r2['poster']]);
+            exit;
+        }
+        echo json_encode(['status'=>'error','msg'=>'No movies available for spin.']);
+        exit;
+    }
+
+    if ($action === 'poll_vote' && $_SERVER['REQUEST_METHOD'] === 'POST') {
+        $poll_id = intval($_POST['poll_id'] ?? 0);
+        $option_id = intval($_POST['option_id'] ?? 0);
+        if ($poll_id <= 0 || $option_id <= 0) {
+            echo json_encode(['status'=>'error','msg'=>'Invalid vote.']);
+            exit;
+        }
+        // optional prevent repeat by same user: use session id
+        $user_ident = session_id();
+        // (You can add more robust prevention if logged in: use user_id)
+        $stmt = $conn->prepare("INSERT INTO poll_votes (poll_id, option_id, user_identifier) VALUES (?, ?, ?)");
+        $stmt->bind_param('iis', $poll_id, $option_id, $user_ident);
+        if ($stmt->execute()) {
+            echo json_encode(['status'=>'ok']);
+        } else {
+            echo json_encode(['status'=>'error','msg'=>'Could not save vote.']);
+        }
+        exit;
+    }
+
+    if ($action === 'poll_results' && $_SERVER['REQUEST_METHOD'] === 'GET') {
+        $poll_id = intval($_GET['poll_id'] ?? 0);
+        if ($poll_id <= 0) {
+            echo json_encode(['status'=>'error','msg'=>'Invalid poll id.']);
+            exit;
+        }
+        // get options + counts
+        $sql = "SELECT po.id, po.option_text, COUNT(pv.id) AS votes
+                FROM poll_options po
+                LEFT JOIN poll_votes pv ON po.id = pv.option_id
+                WHERE po.poll_id = ?
+                GROUP BY po.id ORDER BY po.id";
+        $stmt = $conn->prepare($sql);
+        $stmt->bind_param('i', $poll_id);
+        $stmt->execute();
+        $res = $stmt->get_result();
+        $options = [];
+        $total = 0;
+        while ($r = $res->fetch_assoc()) {
+            $options[] = $r;
+            $total += (int)$r['votes'];
+        }
+        echo json_encode(['status'=>'ok','total'=>$total,'options'=>$options]);
+        exit;
+    }
+
+    if ($action === 'get_upcoming' && $_SERVER['REQUEST_METHOD'] === 'GET') {
+        // return up to 3 upcoming releases
+        $now = date('Y-m-d H:i:s');
+        $stmt = $conn->prepare("SELECT id, title, release_date, poster FROM upcoming_releases WHERE release_date > ? ORDER BY release_date ASC LIMIT 3");
+        $stmt->bind_param('s', $now);
+        $stmt->execute();
+        $res = $stmt->get_result();
+        $items = [];
+        while ($r = $res->fetch_assoc()) $items[] = $r;
+        echo json_encode(['status'=>'ok','items'=>$items]);
+        exit;
+    }
+
+    // unknown action
+    echo json_encode(['status'=>'error','msg'=>'Unknown action']);
+    exit;
+}
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -14,6 +208,8 @@ include 'db.php';
 <link href="css/global.css" rel="stylesheet">
 <link href="css/index.css" rel="stylesheet">
 <link href="https://fonts.googleapis.com/css2?family=Rajdhani&display=swap" rel="stylesheet">
+<!-- animate.css for simple animations -->
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css"/>
 <script src="js/bootstrap.bundle.min.js"></script>
 <style>
 body {font-family:'Rajdhani',sans-serif; background:#030303; color:#fff;}
@@ -22,6 +218,15 @@ body {font-family:'Rajdhani',sans-serif; background:#030303; color:#fff;}
 .bg_red {background-color:#ff2d2d;}
 .bg_grey {background-color:#1a1a1a;}
 .button {background:#ff2d2d;color:#fff;padding:6px 15px;border-radius:4px;text-decoration:none;}
+/* NEW: widget cards */
+.widget-card {border-radius:12px; padding:18px; background: linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.00)); box-shadow: 0 6px 18px rgba(0,0,0,0.6); border:1px solid rgba(255,255,255,0.03);}
+.mood-buttons .btn {margin-right:8px;margin-bottom:8px;}
+#spinWheel {width:220px;height:220px;border-radius:50%;display:flex;align-items:center;justify-content:center;cursor:pointer;border:8px solid rgba(255,255,255,0.03);background:conic-gradient(#ff2d2d 0 25%, rgba(255,255,255,0.02) 25% 50%, #111 50% 75%, rgba(255,255,255,0.02) 75% 100%);}
+.spin-result {min-height:120px;}
+.countdown {font-weight:700;font-size:18px;}
+.poll-option {cursor:pointer;}
+/* small responsive */
+@media (max-width: 991px){ .top_1m .input-group{width:100%!important} .carousel-caption{display:none} }
 </style>
 </head>
 <body>
@@ -293,17 +498,101 @@ body {font-family:'Rajdhani',sans-serif; background:#030303; color:#fff;}
   </div>
 </section>
 
-
-
+<!-- =================== NEW FEATURES SECTION (placed inside #upcome) =================== -->
 <section id="upcome" class="pt-4 pb-5">
+  <div class="container">
+    <div class="row g-4">
 
+      <!-- Mood Based Movie Finder -->
+      <div class="col-lg-4">
+        <div class="widget-card p-3">
+          <h5 class="mb-3">Mood-based Movie Finder</h5>
+          <p class="small text-white-50">Select how you feel and we'll suggest a movie.</p>
+          <div class="mood-buttons mb-3">
+            <button class="btn btn-sm btn-outline-light" data-mood="happy">Happy</button>
+            <button class="btn btn-sm btn-outline-light" data-mood="sad">Sad</button>
+            <button class="btn btn-sm btn-outline-light" data-mood="heartbroken">Heartbroken</button>
+            <button class="btn btn-sm btn-outline-light" data-mood="chill">Chill</button>
+            <button class="btn btn-sm btn-outline-light" data-mood="adventure">Adventure</button>
+          </div>
+          <div id="moodResult" class="mt-2"></div>
+        </div>
+      </div>
 
+      <!-- Pick For You: Mini Quiz -->
+      <div class="col-lg-4">
+        <div class="widget-card p-3">
+          <h5 class="mb-3">Pick for You — Mini Quiz</h5>
+          <p class="small text-white-50">Take a 3-question mini quiz to get a personalized recommendation.</p>
+          <div id="quizArea">
+            <div id="quizQuestions" class="mb-3">Loading quiz...</div>
+            <button id="submitQuiz" class="btn btn-sm bg_red">Get Recommendation</button>
+            <div id="quizResult" class="mt-3 spin-result"></div>
+          </div>
+        </div>
+      </div>
 
+      <!-- Upcoming release countdown -->
+      <div class="col-lg-4">
+        <div class="widget-card p-3">
+          <h5 class="mb-3">Upcoming Releases — Countdown</h5>
+          <p class="small text-white-50">Countdowns for the next 3 releases.</p>
+          <div id="upcomingList" class="row g-2"></div>
+        </div>
+      </div>
 
+      <!-- Daily Spin Wheel -->
+      <div class="col-lg-4">
+        <div class="widget-card p-3">
+          <h5 class="mb-3">Daily Spin — Try your luck</h5>
+          <p class="small text-white-50">Click the wheel to get a movie pick for today.</p>
+          <div class="d-flex justify-content-center mb-3">
+            <div id="spinWheel" class="animate__animated" title="Click to spin">
+              <div style="text-align:center;color:#fff;">
+                <i class="fa fa-random fa-2x"></i><div style="font-size:12px;margin-top:6px;">SPIN</div>
+              </div>
+            </div>
+          </div>
+          <div id="spinResult" class="spin-result"></div>
+        </div>
+      </div>
+
+      <!-- Poll of the Day -->
+      <div class="col-lg-8">
+        <div class="widget-card p-3">
+          <h5 class="mb-3">Poll of the Day</h5>
+          <div id="pollArea">
+            <?php
+            // show active poll (most recent)
+            $pollQ = $conn->query("SELECT id, question FROM poll_of_the_day ORDER BY created_at DESC LIMIT 1");
+            if ($pollQ && $pollQ->num_rows > 0) {
+              $poll = $pollQ->fetch_assoc();
+              $poll_id = (int)$poll['id'];
+              echo '<div id="pollQuestion" class="mb-2">'.htmlspecialchars($poll['question']).'</div>';
+              $opts = $conn->prepare("SELECT id, option_text FROM poll_options WHERE poll_id = ?");
+              $opts->bind_param('i',$poll_id);
+              $opts->execute();
+              $resOpts = $opts->get_result();
+              echo '<div id="pollOptions" class="row g-2">';
+              while ($o = $resOpts->fetch_assoc()) {
+                echo '<div class="col-md-4"><div class="p-2 bg_black" style="background:#0b0b0b;border-radius:8px;">';
+                echo '<div class="poll-option" data-poll="'.$poll_id.'" data-option="'.(int)$o['id'].'">'.htmlspecialchars($o['option_text']).'</div>';
+                echo '</div></div>';
+              }
+              echo '</div>';
+              echo '<div class="mt-3" id="pollResultsSmall"></div>';
+            } else {
+              echo '<div class="small text-white-50">No poll available.</div>';
+            }
+            ?>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
 </section>
-
-
-
+<!-- =================== END NEW FEATURES =================== -->
 
 <section id="footer">
 <div class="footer_m clearfix">
@@ -369,6 +658,8 @@ function myFunction() {
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 <script>
 $(document).ready(function(){
+
+    // existing search functionality
     $('#movieSearch').on('keyup', function(){
         var term = $(this).val();
         if(term.length > 1){
@@ -385,7 +676,6 @@ $(document).ready(function(){
         }
     });
 
-    // Optional: search button click
     $('#searchBtn').on('click', function(){
         var term = $('#movieSearch').val();
         if(term.length > 0){
@@ -399,10 +689,149 @@ $(document).ready(function(){
             });
         }
     });
+
+    // --- Mood finder ---
+    $('.mood-buttons .btn').on('click', function(){
+        var mood = $(this).data('mood');
+        $('#moodResult').html('<div class="text-white small">Searching...</div>');
+        $.post('?action=get_mood_suggestion', {mood: mood}, function(resp){
+            try { resp = JSON.parse(resp); } catch(e){ resp = resp; }
+            if (resp.status === 'ok') {
+                $('#moodResult').html(resp.html);
+            } else {
+                $('#moodResult').html('<div class="text-white small">No suggestion.</div>');
+            }
+        });
+    });
+
+    // --- Quiz load & submit ---
+    function loadQuiz(){
+        $.get('?action=get_quiz', function(resp){
+            try { resp = JSON.parse(resp); } catch(e){ resp = resp; }
+            if (resp.status === 'ok') {
+                $('#quizQuestions').html(resp.html);
+            } else {
+                $('#quizQuestions').html('<div class="small text-white-50">Quiz not available.</div>');
+            }
+        });
+    }
+    loadQuiz();
+
+    $('#submitQuiz').on('click', function(){
+        var answers = [];
+        $('#quizQuestions input[type=radio]:checked').each(function(){
+            answers.push($(this).val());
+        });
+        if (answers.length < 1) { alert('Please answer the quiz.'); return; }
+        $('#quizResult').html('<div class="small text-white-50">Generating recommendation...</div>');
+        $.post('?action=quiz_submit', {answers: answers}, function(resp){
+            try { resp = JSON.parse(resp); } catch(e){ resp = resp; }
+            if (resp.status === 'ok') {
+                $('#quizResult').html(resp.html);
+            } else {
+                $('#quizResult').html('<div class="small text-white-50">Could not generate recommendation.</div>');
+            }
+        });
+    });
+
+    // --- Spin Wheel ---
+    var spinning = false;
+    $('#spinWheel').on('click', function(){
+        if (spinning) return;
+        spinning = true;
+        var el = $(this);
+        el.addClass('animate__rotateIn');
+        el.css({'transition':'transform 2.5s ease-out','transform':'rotate(1080deg)'});
+        setTimeout(function(){
+            // reset rotation smoothly
+            el.css({'transform':'rotate(0deg)','transition':'none'});
+            // get random movie
+            $.get('?action=spin_wheel', function(resp){
+                try { resp = JSON.parse(resp); } catch(e){ resp = resp; }
+                if (resp.status === 'ok') {
+                    var html = '<div class="d-flex align-items-center"><img src="uploads/'+(resp.poster||'default_movie.jpg')+'" style="width:80px;height:110px;object-fit:cover;border-radius:6px;margin-right:12px;"><div><div class="small text-white-50">Your pick</div><div class="fw-bold">'+resp.title+'</div><a class="button mt-2 d-inline-block" href="search_results.php?title='+encodeURIComponent(resp.title)+'">View</a></div></div>';
+                    $('#spinResult').html(html);
+                } else {
+                    $('#spinResult').html('<div class="small text-white-50">'+(resp.msg||'No movie found')+'</div>');
+                }
+                spinning = false;
+            });
+        }, 900);
+    });
+
+    // --- Poll ---
+    $('#pollOptions .poll-option').on('click', function(){
+        var poll = $(this).data('poll');
+        var option = $(this).data('option');
+        if (!poll || !option) return;
+        $.post('?action=poll_vote', {poll_id: poll, option_id: option}, function(resp){
+            try { resp = JSON.parse(resp); } catch(e){ resp = resp; }
+            if (resp.status === 'ok') {
+                loadPollResults(poll);
+            } else {
+                alert('Could not submit vote.');
+            }
+        });
+    });
+
+    function loadPollResults(poll_id){
+        $.get('?action=poll_results&poll_id='+poll_id, function(resp){
+            try { resp = JSON.parse(resp); } catch(e){ resp = resp; }
+            if (resp.status === 'ok') {
+                var total = resp.total || 0;
+                var html = '';
+                resp.options.forEach(function(opt){
+                    var pct = total ? Math.round((opt.votes/total)*100) : 0;
+                    html += '<div class="mb-2"><div class="small text-white-50">'+opt.option_text+' — '+opt.votes+' votes</div><div class="progress" style="height:8px;background:#0b0b0b"><div class="progress-bar" role="progressbar" style="width:'+pct+'%"></div></div></div>';
+                });
+                $('#pollResultsSmall').html(html);
+            }
+        });
+    }
+
+    // initial load poll results if poll exists
+    var firstPoll = $('#pollOptions').length ? $('#pollOptions .poll-option').first().data('poll') : null;
+    if (firstPoll) loadPollResults(firstPoll);
+
+    // --- Upcoming countdowns ---
+    function loadUpcoming() {
+        $.get('?action=get_upcoming', function(resp){
+            try { resp = JSON.parse(resp); } catch(e){ resp = resp; }
+            if (resp.status === 'ok') {
+                var html = '';
+                resp.items.forEach(function(item, idx){
+                    var id = 'countdown_'+item.id;
+                    html += '<div class="col-md-4"><div class="p-2 bg_black" style="background:#0b0b0b;border-radius:8px;"><div class="mb-2"><img src="uploads/'+(item.poster || 'default_movie.jpg')+'" style="width:100%;height:120px;object-fit:cover;border-radius:6px;"></div><div class="fw-bold">'+item.title+'</div><div class="small text-white-50 mb-2">Release: '+item.release_date+'</div><div id="'+id+'" class="countdown">--:--:--</div></div></div>';
+                });
+                $('#upcomingList').html(html);
+                // start countdowns
+                resp.items.forEach(function(item){
+                    startCountdown('countdown_'+item.id, item.release_date);
+                });
+            }
+        });
+    }
+    function startCountdown(elid, targetDateStr) {
+        var el = document.getElementById(elid);
+        if (!el) return;
+        var target = new Date(targetDateStr).getTime();
+        function tick(){
+            var now = new Date().getTime();
+            var diff = target - now;
+            if (diff <= 0) { el.innerText = 'Released!'; return; }
+            var days = Math.floor(diff / (1000*60*60*24));
+            var hours = Math.floor((diff % (1000*60*60*24)) / (1000*60*60));
+            var mins = Math.floor((diff % (1000*60*60)) / (1000*60));
+            var secs = Math.floor((diff % (1000*60)) / 1000);
+            el.innerText = days+'d '+hours+'h '+mins+'m '+secs+'s';
+            setTimeout(tick, 1000);
+        }
+        tick();
+    }
+    loadUpcoming();
+
 });
 </script>
 
-
 </body>
-
 </html>
