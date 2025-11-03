@@ -128,12 +128,11 @@ body {font-family:'Rajdhani',sans-serif; background:#030303; color:#fff;}
     </button>
     <div class="collapse navbar-collapse" id="navbarSupportedContent">
       <ul class="navbar-nav mb-0">
-        <li class="nav-item"><a class="nav-link active" href="index.php">Home</a></li>
+       <li class="nav-item"><a class="nav-link active" href="index.php">Home</a></li>
         <li class="nav-item"><a class="nav-link" href="about.html">About Us</a></li>
         <li class="nav-item"><a class="nav-link" href="contact.php">Contact Us</a></li>
         <li class="nav-item"><a class="nav-link" href="booking.php"> Ticket booking</a></li>
         <li class="nav-item"><a class="nav-link" href="service.php"> Service</a></li>
-
 
       </ul>
     </div>
@@ -295,101 +294,16 @@ body {font-family:'Rajdhani',sans-serif; background:#030303; color:#fff;}
 </section>
 
 
-<!-- =================== NEW FEATURES SECTION (placed inside #upcome) =================== -->
+
 <section id="upcome" class="pt-4 pb-5">
-  <div class="container">
-    <div class="row g-4">
 
-      <!-- Mood Based Movie Finder -->
-      <div class="col-lg-4">
-        <div class="widget-card p-3">
-          <h5 class="mb-3">Mood-based Movie Finder</h5>
-          <p class="small text-white-50">Select how you feel and we'll suggest a movie.</p>
-          <div class="mood-buttons mb-3">
-            <button class="btn btn-sm btn-outline-light" data-mood="happy">Happy</button>
-            <button class="btn btn-sm btn-outline-light" data-mood="sad">Sad</button>
-            <button class="btn btn-sm btn-outline-light" data-mood="heartbroken">Heartbroken</button>
-            <button class="btn btn-sm btn-outline-light" data-mood="chill">Chill</button>
-            <button class="btn btn-sm btn-outline-light" data-mood="adventure">Adventure</button>
-          </div>
-          <div id="moodResult" class="mt-2"></div>
-        </div>
-      </div>
 
-      <!-- Pick For You: Mini Quiz -->
-      <div class="col-lg-4">
-        <div class="widget-card p-3">
-          <h5 class="mb-3">Pick for You — Mini Quiz</h5>
-          <p class="small text-white-50">Take a 3-question mini quiz to get a personalized recommendation.</p>
-          <div id="quizArea">
-            <div id="quizQuestions" class="mb-3">Loading quiz...</div>
-            <button id="submitQuiz" class="btn btn-sm bg_red">Get Recommendation</button>
-            <div id="quizResult" class="mt-3 spin-result"></div>
-          </div>
-        </div>
-      </div>
 
-      <!-- Upcoming release countdown -->
-      <div class="col-lg-4">
-        <div class="widget-card p-3">
-          <h5 class="mb-3">Upcoming Releases — Countdown</h5>
-          <p class="small text-white-50">Countdowns for the next 3 releases.</p>
-          <div id="upcomingList" class="row g-2"></div>
-        </div>
-      </div>
 
-      <!-- Daily Spin Wheel -->
-      <div class="col-lg-4">
-        <div class="widget-card p-3">
-          <h5 class="mb-3">Daily Spin — Try your luck</h5>
-          <p class="small text-white-50">Click the wheel to get a movie pick for today.</p>
-          <div class="d-flex justify-content-center mb-3">
-            <div id="spinWheel" class="animate__animated" title="Click to spin">
-              <div style="text-align:center;color:#fff;">
-                <i class="fa fa-random fa-2x"></i><div style="font-size:12px;margin-top:6px;">SPIN</div>
-              </div>
-            </div>
-          </div>
-          <div id="spinResult" class="spin-result"></div>
-        </div>
-      </div>
-
-      <!-- Poll of the Day -->
-      <div class="col-lg-8">
-        <div class="widget-card p-3">
-          <h5 class="mb-3">Poll of the Day</h5>
-          <div id="pollArea">
-            <?php
-            // show active poll (most recent)
-            $pollQ = $conn->query("SELECT id, question FROM poll_of_the_day ORDER BY created_at DESC LIMIT 1");
-            if ($pollQ && $pollQ->num_rows > 0) {
-              $poll = $pollQ->fetch_assoc();
-              $poll_id = (int)$poll['id'];
-              echo '<div id="pollQuestion" class="mb-2">'.htmlspecialchars($poll['question']).'</div>';
-              $opts = $conn->prepare("SELECT id, option_text FROM poll_options WHERE poll_id = ?");
-              $opts->bind_param('i',$poll_id);
-              $opts->execute();
-              $resOpts = $opts->get_result();
-              echo '<div id="pollOptions" class="row g-2">';
-              while ($o = $resOpts->fetch_assoc()) {
-                echo '<div class="col-md-4"><div class="p-2 bg_black" style="background:#0b0b0b;border-radius:8px;">';
-                echo '<div class="poll-option" data-poll="'.$poll_id.'" data-option="'.(int)$o['id'].'">'.htmlspecialchars($o['option_text']).'</div>';
-                echo '</div></div>';
-              }
-              echo '</div>';
-              echo '<div class="mt-3" id="pollResultsSmall"></div>';
-            } else {
-              echo '<div class="small text-white-50">No poll available.</div>';
-            }
-            ?>
-          </div>
-        </div>
-      </div>
-
-    </div>
-  </div>
 </section>
-<!-- =================== END NEW FEATURES =================== -->
+
+
+
 
 <section id="footer">
 <div class="footer_m clearfix">
@@ -397,7 +311,7 @@ body {font-family:'Rajdhani',sans-serif; background:#030303; color:#fff;}
    <div class="row footer_1">
     <div class="col-md-4">
 	 <div class="footer_1i">
-	   <h3><a class="text-white" href="index.html"><i class="fa fa-video-camera col_red me-1"></i> Flick-fix</a></h3>
+	   <h3><a class="text-white" href="index.html"><i class="fa fa-video-camera col_red me-1"></i> Planet</a></h3>
 	   <p class="mt-3">Lorem ipsum dolor sit amet consect etur adi pisicing elit sed do eiusmod tempor incididunt. Lorem ipsum dolor sit amet consect etur. </p>
 	   <h6 class="fw-normal"><i class="fa fa-map-marker fs-5 align-middle col_red me-1"></i> 5311 Ceaver Sidge Td.
 Pakland, DE 13507</h6>
@@ -421,10 +335,6 @@ Pakland, DE 13507</h6>
 </div>
 </div>
 </section>
-
-
-
-
 
 <section id="footer_b" class="pt-3 pb-3 bg_grey">
 <div class="container">
@@ -490,183 +400,6 @@ $(document).ready(function(){
         }
     });
 });
-
-<script>
-$(document).ready(function(){
-
-    // existing search functionality
-    $('#movieSearch').on('keyup', function(){
-        var term = $(this).val();
-        if(term.length > 1){
-            $.ajax({
-                url: 'search.php',
-                method: 'GET',
-                data: {term: term},
-                success: function(data){
-                    $('#searchResults').html(data);
-                }
-            });
-        } else {
-            $('#searchResults').html('');
-        }
-    });
-
-    $('#searchBtn').on('click', function(){
-        var term = $('#movieSearch').val();
-        if(term.length > 0){
-            $.ajax({
-                url: 'search.php',
-                method: 'GET',
-                data: {term: term},
-                success: function(data){
-                    $('#searchResults').html(data);
-                }
-            });
-        }
-    });
-
-    // --- Mood finder ---
-    $('.mood-buttons .btn').on('click', function(){
-        var mood = $(this).data('mood');
-        $('#moodResult').html('<div class="text-white small">Searching...</div>');
-        $.post('?action=get_mood_suggestion', {mood: mood}, function(resp){
-            try { resp = JSON.parse(resp); } catch(e){ resp = resp; }
-            if (resp.status === 'ok') {
-                $('#moodResult').html(resp.html);
-            } else {
-                $('#moodResult').html('<div class="text-white small">No suggestion.</div>');
-            }
-        });
-    });
-
-    // --- Quiz load & submit ---
-    function loadQuiz(){
-        $.get('?action=get_quiz', function(resp){
-            try { resp = JSON.parse(resp); } catch(e){ resp = resp; }
-            if (resp.status === 'ok') {
-                $('#quizQuestions').html(resp.html);
-            } else {
-                $('#quizQuestions').html('<div class="small text-white-50">Quiz not available.</div>');
-            }
-        });
-    }
-    loadQuiz();
-
-    $('#submitQuiz').on('click', function(){
-        var answers = [];
-        $('#quizQuestions input[type=radio]:checked').each(function(){
-            answers.push($(this).val());
-        });
-        if (answers.length < 1) { alert('Please answer the quiz.'); return; }
-        $('#quizResult').html('<div class="small text-white-50">Generating recommendation...</div>');
-        $.post('?action=quiz_submit', {answers: answers}, function(resp){
-            try { resp = JSON.parse(resp); } catch(e){ resp = resp; }
-            if (resp.status === 'ok') {
-                $('#quizResult').html(resp.html);
-            } else {
-                $('#quizResult').html('<div class="small text-white-50">Could not generate recommendation.</div>');
-            }
-        });
-    });
-
-    // --- Spin Wheel ---
-    var spinning = false;
-    $('#spinWheel').on('click', function(){
-        if (spinning) return;
-        spinning = true;
-        var el = $(this);
-        el.addClass('animate__rotateIn');
-        el.css({'transition':'transform 2.5s ease-out','transform':'rotate(1080deg)'});
-        setTimeout(function(){
-            // reset rotation smoothly
-            el.css({'transform':'rotate(0deg)','transition':'none'});
-            // get random movie
-            $.get('?action=spin_wheel', function(resp){
-                try { resp = JSON.parse(resp); } catch(e){ resp = resp; }
-                if (resp.status === 'ok') {
-                    var html = '<div class="d-flex align-items-center"><img src="uploads/'+(resp.poster||'default_movie.jpg')+'" style="width:80px;height:110px;object-fit:cover;border-radius:6px;margin-right:12px;"><div><div class="small text-white-50">Your pick</div><div class="fw-bold">'+resp.title+'</div><a class="button mt-2 d-inline-block" href="search_results.php?title='+encodeURIComponent(resp.title)+'">View</a></div></div>';
-                    $('#spinResult').html(html);
-                } else {
-                    $('#spinResult').html('<div class="small text-white-50">'+(resp.msg||'No movie found')+'</div>');
-                }
-                spinning = false;
-            });
-        }, 900);
-    });
-
-    // --- Poll ---
-    $('#pollOptions .poll-option').on('click', function(){
-        var poll = $(this).data('poll');
-        var option = $(this).data('option');
-        if (!poll || !option) return;
-        $.post('?action=poll_vote', {poll_id: poll, option_id: option}, function(resp){
-            try { resp = JSON.parse(resp); } catch(e){ resp = resp; }
-            if (resp.status === 'ok') {
-                loadPollResults(poll);
-            } else {
-                alert('Could not submit vote.');
-            }
-        });
-    });
-
-    function loadPollResults(poll_id){
-        $.get('?action=poll_results&poll_id='+poll_id, function(resp){
-            try { resp = JSON.parse(resp); } catch(e){ resp = resp; }
-            if (resp.status === 'ok') {
-                var total = resp.total || 0;
-                var html = '';
-                resp.options.forEach(function(opt){
-                    var pct = total ? Math.round((opt.votes/total)*100) : 0;
-                    html += '<div class="mb-2"><div class="small text-white-50">'+opt.option_text+' — '+opt.votes+' votes</div><div class="progress" style="height:8px;background:#0b0b0b"><div class="progress-bar" role="progressbar" style="width:'+pct+'%"></div></div></div>';
-                });
-                $('#pollResultsSmall').html(html);
-            }
-        });
-    }
-
-    // initial load poll results if poll exists
-    var firstPoll = $('#pollOptions').length ? $('#pollOptions .poll-option').first().data('poll') : null;
-    if (firstPoll) loadPollResults(firstPoll);
-
-    // --- Upcoming countdowns ---
-    function loadUpcoming() {
-        $.get('?action=get_upcoming', function(resp){
-            try { resp = JSON.parse(resp); } catch(e){ resp = resp; }
-            if (resp.status === 'ok') {
-                var html = '';
-                resp.items.forEach(function(item, idx){
-                    var id = 'countdown_'+item.id;
-                    html += '<div class="col-md-4"><div class="p-2 bg_black" style="background:#0b0b0b;border-radius:8px;"><div class="mb-2"><img src="uploads/'+(item.poster || 'default_movie.jpg')+'" style="width:100%;height:120px;object-fit:cover;border-radius:6px;"></div><div class="fw-bold">'+item.title+'</div><div class="small text-white-50 mb-2">Release: '+item.release_date+'</div><div id="'+id+'" class="countdown">--:--:--</div></div></div>';
-                });
-                $('#upcomingList').html(html);
-                // start countdowns
-                resp.items.forEach(function(item){
-                    startCountdown('countdown_'+item.id, item.release_date);
-                });
-            }
-        });
-    }
-    function startCountdown(elid, targetDateStr) {
-        var el = document.getElementById(elid);
-        if (!el) return;
-        var target = new Date(targetDateStr).getTime();
-        function tick(){
-            var now = new Date().getTime();
-            var diff = target - now;
-            if (diff <= 0) { el.innerText = 'Released!'; return; }
-            var days = Math.floor(diff / (1000*60*60*24));
-            var hours = Math.floor((diff % (1000*60*60*24)) / (1000*60*60));
-            var mins = Math.floor((diff % (1000*60*60)) / (1000*60));
-            var secs = Math.floor((diff % (1000*60)) / 1000);
-            el.innerText = days+'d '+hours+'h '+mins+'m '+secs+'s';
-            setTimeout(tick, 1000);
-        }
-        tick();
-    }
-    loadUpcoming();
-
-});
-</script>
 </script>
 
 
